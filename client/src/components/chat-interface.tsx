@@ -6,8 +6,9 @@ function ChatInterface() {
 
   return (
     <div className="dark text-teal-50 flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-center text-6xl font-serif">
-        <span className="text-teal-300">Welcome</span>, Adventurer
+      <h1 className="text-center text-6xl font-serif flex items-center gap-4">
+        <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />
+        <span className="text-teal-300">Welcome,</span> Adventurer
       </h1>
       <div className="my-10">
         <Button className="font-semibold font-mono" onClick={() => setCount((count) => count + 1)}>
