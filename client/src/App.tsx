@@ -8,7 +8,7 @@ function App() {
     <>
       <AppSidebar />
       <SidebarInset>
-        <SidebarTrigger />
+        <SidebarTrigger className="m-4 scale-125" />
         <ChatInterface />
       </SidebarInset>
     </>
