@@ -14,7 +14,7 @@ function ChatInterface() {
       </h1>
       <div>
         <div className="m-10 rounded-2xl p-3 border-2 focus-within:border-teal-300/100 transition-all duration-300">
-          <LLMTextarea className="w-180 font-semibold" placeholder="How can I help you today?" />
+          <LLMTextarea className="w-180 font-mono" placeholder="How can I help you today?" />
           <div className="mt-2 flex justify-end">
             <Button variant="outline" size="icon" className="font-semibold font-mono hover:text-teal-300" onClick={() => setCount((count) => count + 1)}>
               <Send />
