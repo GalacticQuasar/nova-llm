@@ -8,16 +8,16 @@ function ChatInterface() {
 
   return (
     <div className="dark text-teal-50 flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-center text-6xl font-serif flex items-center gap-4">
+      <h1 id="welcome-message" className="text-center text-6xl font-serif flex items-center gap-4">
         <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />
-        <span className="text-teal-300">Welcome,</span> Adventurer
+        <span className="text-teal-300">Welcome,</span> User
       </h1>
       <div>
         <div className="m-10 rounded-2xl p-3 border-2 focus-within:border-teal-300/100 transition-all duration-300">
           <LLMTextarea className="w-180 font-mono" placeholder="How can I help you today?" />
           <div className="mt-2 flex justify-end">
             <Button variant="outline" size="icon" className="font-semibold font-mono hover:text-teal-300" onClick={() => setCount((count) => count + 1)}>
-              <Send />
+              <Send className="scale-125" />
             </Button>
           </div>
         </div>

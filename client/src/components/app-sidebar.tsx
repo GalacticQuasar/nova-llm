@@ -39,8 +39,8 @@ const items = [
 ]
 
 const user = {
-  name: "shadcn",
-  email: "m@example.com",
+  name: "User",
+  email: "user@example.com",
   avatar: "Galactic-Logo.png",  // Update this to be dynamically later
 }
 
@@ -51,7 +51,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarTrigger className="m-0.5 scale-125" />
+        <SidebarTrigger className="m-0.5 scale-125 hover:text-teal-300" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
