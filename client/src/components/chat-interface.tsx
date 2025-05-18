@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/llm-textarea"
+import { LLMTextarea } from "@/components/llm-textarea"
+import { Send } from "lucide-react"
 
 function ChatInterface() {
   const [count, setCount] = useState(0)
@@ -13,10 +14,10 @@ function ChatInterface() {
       </h1>
       <div>
         <div className="m-10 rounded-2xl p-3 border-2 focus-within:border-teal-300/100 transition-all duration-300">
-          <Textarea className="w-180 font-mono font-semibold" placeholder="How can I help you today?" />
+          <LLMTextarea className="w-180 font-semibold" placeholder="How can I help you today?" />
           <div className="mt-2 flex justify-end">
-            <Button className="font-semibold font-mono" onClick={() => setCount((count) => count + 1)}>
-            The count is <span className="text-teal-600">{count}</span>
+            <Button variant="outline" size="icon" className="font-semibold font-mono hover:text-teal-300" onClick={() => setCount((count) => count + 1)}>
+              <Send />
             </Button>
           </div>
         </div>
