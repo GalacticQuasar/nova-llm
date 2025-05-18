@@ -54,19 +54,19 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarTrigger className="m-0.5 scale-125 hover:text-teal-300" />
-        <Button variant="outline" className="flex items-center gap-2 text-teal-300 hover:text-white">
+        <Button variant="outline" className="flex items-center gap-2 text-teal-300 hover:text-teal-500">
           <CirclePlus className="m-1 scale-125" />
           {!isCollapsed ? <span className="">New Chat</span> : null}
         </Button>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
+          <SidebarGroupLabel className="ml-1">Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <div className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem className="m-1" key={item.title}>
                     <SidebarMenuButton asChild>
                       <a href={item.url}>
                         <span>{item.title}</span>
