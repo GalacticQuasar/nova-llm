@@ -21,7 +21,7 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    /* "erasableSyntaxOnly": true,  */ /* For some reason cursor typescript intellisense is not recognizing this, remove comment later */
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
