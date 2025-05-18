@@ -9,55 +9,60 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
-// Menu items.
+// Menu items
 const items = [
   {
-    title: "Home",
+    title: "How to cut a watermelon?",
     url: "#",
-    icon: Home,
   },
   {
-    title: "Inbox",
+    title: "What color are bananas?",
     url: "#",
-    icon: Inbox,
   },
   {
-    title: "Calendar",
+    title: "Explain the theory of relativity",
     url: "#",
-    icon: Calendar,
   },
   {
-    title: "Search",
+    title: "How to make a cake?",
     url: "#",
-    icon: Search,
   },
   {
-    title: "Settings",
+    title: "How to make a sandwich?",
     url: "#",
-    icon: Settings,
   },
 ]
 
 export function AppSidebar() {
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
+
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarTrigger className="m-0.5 scale-125" />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <div className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
