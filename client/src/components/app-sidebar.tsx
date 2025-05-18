@@ -13,6 +13,8 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar"
 import { NavUser } from "./nav-user"
+import { CirclePlus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 // Menu items
 const items = [
@@ -52,6 +54,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarTrigger className="m-0.5 scale-125 hover:text-teal-300" />
+        <Button variant="outline" className="flex items-center gap-2 text-teal-300 hover:text-white">
+          <CirclePlus className="m-1 scale-125" />
+          {!isCollapsed ? <span className="">New Chat</span> : null}
+        </Button>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
