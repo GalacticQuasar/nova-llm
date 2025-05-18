@@ -10,7 +10,9 @@ import {
   SidebarTrigger,
   SidebarHeader,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar"
+import { NavUser } from "./nav-user"
 
 // Menu items
 const items = [
@@ -35,6 +37,12 @@ const items = [
     url: "#",
   },
 ]
+
+const user = {
+  name: "shadcn",
+  email: "m@example.com",
+  avatar: "Galactic-Logo.png",  // Update this to be dynamically later
+}
 
 export function AppSidebar() {
   const { state } = useSidebar()
@@ -65,6 +73,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
     </Sidebar>
   )
 }

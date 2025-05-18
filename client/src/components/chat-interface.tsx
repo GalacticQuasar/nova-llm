@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 
 function ChatInterface() {
   const [count, setCount] = useState(0)
@@ -10,10 +11,13 @@ function ChatInterface() {
         <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />
         <span className="text-teal-300">Welcome,</span> Adventurer
       </h1>
-      <div className="my-10">
-        <Button className="font-semibold font-mono" onClick={() => setCount((count) => count + 1)}>
-        The count is <span className="text-teal-600">{count}</span>
-        </Button>
+      <div>
+        <div className="m-10 bg-teal-900 rounded-lg p-4">
+          <Textarea className="w-180 mb-4 font-mono font-semibold" placeholder="How can I help you today?" />
+          <Button className="font-semibold font-mono" onClick={() => setCount((count) => count + 1)}>
+          The count is <span className="text-teal-600">{count}</span>
+          </Button>
+        </div>
       </div>
     </div>
   )
