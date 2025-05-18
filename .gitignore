@@ -1,0 +1,16 @@
+# dependencies
+**/node_modules
+
+# testing
+**/coverage
+
+# production
+**/build
+
+# misc
+**/.env
+**/.env.*.local
+
+**/npm-debug.log*
+
+.vscode/*
