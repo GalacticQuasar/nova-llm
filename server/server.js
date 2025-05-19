@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const GoogleGenAI = require("@google/genai");
+const { GoogleGenAI } = require("@google/genai");
 
 dotenv.config();
 
@@ -36,12 +36,15 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
+	console.log("Received message: ", req.body.message);
+
 	const response = await ai.models.generateContent({
 		model: "gemini-2.0-flash",
-		contents: "How does AI work?",
-	  });
-	  console.log("Generated response: ", response.text);
-	res.json({ response: response.text });
+		contents: req.body.message,
+	});
+
+	console.log("Generated response: ", response.text);
+	res.json({ responseText: response.text });
 });
 
 /* SERVER */

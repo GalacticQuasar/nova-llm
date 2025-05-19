@@ -6,3 +6,13 @@ export const api = axios.create({
 		"Content-Type": "application/json",
 	},
 });
+
+export const getTest = async () => {
+    const response = await api.get("/test");
+    return response.data;
+};
+
+export const postChat = async (message: string) => {
+    const response = await api.post("/chat", { message });
+    return response.data;
+};
