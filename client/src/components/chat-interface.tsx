@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ChatInput } from "@/components/chat-input"
 import { postChat } from '@/api/api'
+import { ChatInputStart } from "@/components/chat-input-start"
+import { ChatInput } from "@/components/chat-input"
 
 type Message = {
   role: 'user' | 'llm'
@@ -16,11 +17,11 @@ function ChatInterface() {
   const [isError, setIsError] = useState(false)
 
   const handleSend = async () => {
+    if (!prompt.trim()) return;
+
     if (startState) {
       setStartState(false)
     }
-
-    if (!prompt.trim()) return;
 
     // Add user message
     const userMessage: Message = { role: 'user', content: prompt };
@@ -45,16 +46,21 @@ function ChatInterface() {
         <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />
         <span className="text-teal-300">Welcome,</span> User
       </h1>}
+      {isLoading && <div className="mt-4 text-center text-gray-500">Loading...</div>}
+      {response && <div className="mt-4 text-center text-gray-500"><p>{response}</p></div>}
       <div>
-        <ChatInput
+        {startState ? <ChatInputStart
           prompt={prompt}
           setPrompt={setPrompt}
           isLoading={isLoading}
           onSend={handleSend}
-        />
+        /> : <ChatInput
+          prompt={prompt}
+          setPrompt={setPrompt}
+          isLoading={isLoading}
+          onSend={handleSend}
+        />}
       </div>
-      {isLoading && <div className="mt-4 text-center text-gray-500">Loading...</div>}
-      {response && <div className="mt-4 text-center text-gray-500"><p>{response}</p></div>}
     </div>
   )
 }

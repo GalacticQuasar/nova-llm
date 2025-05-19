@@ -1,15 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { LLMTextarea } from "@/components/llm-textarea"
 import { Send } from "lucide-react"
+import type { ChatInputProps } from "@/components/chat-input"
 
-export interface ChatInputProps {
-  prompt: string
-  setPrompt: (prompt: string) => void
-  isLoading: boolean
-  onSend: () => void
-}
-
-export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputProps) {
+export function ChatInputStart({ prompt, setPrompt, isLoading, onSend }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
@@ -29,7 +23,7 @@ export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputPro
             onSend();
           }
         }}
-        placeholder="Reply to Nova..."
+        placeholder="How can I help you today?"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         disabled={isLoading}
