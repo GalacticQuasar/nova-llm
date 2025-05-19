@@ -37,13 +37,17 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-	// Testing (return text from testing-response.txt)
-	res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
-	/*
+	const testing = true; // Remove this for production
+
 	console.log("Received messages: ", req.body.messages);
 
 	if (req.body.messages.length === 0) {
 		res.status(400).json({ error: "No messages received" });
+		return;
+	}
+
+	if (testing) {
+		res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
 		return;
 	}
 
@@ -60,7 +64,6 @@ app.post("/api/chat", async (req, res) => {
 
 	console.log("Generated response: ", response.text);
 	res.json({ llmResponse: response.text });
-	*/
 });
 
 /* SERVER */

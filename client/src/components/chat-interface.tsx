@@ -9,7 +9,6 @@ function ChatInterface() {
   const [faded, setFaded] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [prompt, setPrompt] = useState("")
-  const [response, setResponse] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
 
@@ -35,7 +34,6 @@ function ChatInterface() {
       const response = await postChat(updatedMessages)
       console.log(response.llmResponse)
       setMessages(prev => [...prev, { role: 'model' as const, content: response.llmResponse }])
-      setResponse(response.llmResponse)
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
     } finally {
