@@ -30,8 +30,9 @@ function ChatInterface() {
         <span className="text-teal-300">Welcome,</span> User
       </h1>
       <div>
-        <div 
-          className="m-10 rounded-2xl p-3 border-1 focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text"
+        <div
+          id="chat-input-container"
+          className={`m-10 rounded-2xl p-3 border-1 focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
           onClick={(e) => {
             const textarea = e.currentTarget.querySelector('textarea')
             if (textarea) {
@@ -39,9 +40,27 @@ function ChatInterface() {
             }
           }}
         >
-          <LLMTextarea className="w-160 font-mono" placeholder="How can I help you today?" value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+          <LLMTextarea 
+            className="w-160 font-mono" 
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="How can I help you today?"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            disabled={isLoading}
+          />
           <div className="flex justify-end">
-            <Button variant="outline" size="icon" className="font-semibold font-mono hover:text-teal-300" onClick={handleSend}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="font-semibold font-mono hover:text-teal-300" 
+              onClick={handleSend}
+              disabled={isLoading}
+            >
               <Send className="scale-125" />
             </Button>
           </div>
