@@ -31,7 +31,7 @@ export function ChatInputStart({ prompt, setPrompt, onSend }: ChatInputProps) {
         <Button 
           variant="outline" 
           size="icon" 
-          className="font-semibold font-mono hover:text-teal-300" 
+          className={`cursor-pointer ${prompt.length > 0 ? 'text-teal-300' : 'text-muted-foreground'}`}
           onClick={onSend}
         >
           <Send className="scale-125" />

@@ -12,7 +12,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
-      className={`mb-4 w-180 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
+      className={`mb-3 w-180 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
       onClick={(e) => {
         const textarea = e.currentTarget.querySelector('textarea')
         if (textarea) {
@@ -20,7 +20,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
         }
       }}
     >
-      <LLMTextarea 
+      <LLMTextarea
         className="font-mono"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
@@ -36,7 +36,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
         <Button 
           variant="outline" 
           size="icon" 
-          className="font-semibold font-mono hover:text-teal-300" 
+          className={`cursor-pointer ${prompt.length > 0 ? 'text-teal-300' : 'text-muted-foreground'}`}
           onClick={onSend}
         >
           <Send className="scale-125" />

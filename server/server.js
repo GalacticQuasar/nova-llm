@@ -36,6 +36,7 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
+	/*
 	console.log("Received message: ", req.body.message);
 
 	const response = await ai.models.generateContent({
@@ -45,6 +46,10 @@ app.post("/api/chat", async (req, res) => {
 
 	console.log("Generated response: ", response.text);
 	res.json({ responseText: response.text });
+	*/
+
+	// Testing:
+	res.json({ responseText: "<Simulated LLM Response>" });
 });
 
 /* SERVER */
