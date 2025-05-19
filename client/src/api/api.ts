@@ -14,6 +14,7 @@ export const getTest = async () => {
 };
 
 export const postChat = async (messages: Message[]) => {
+    console.log("Sending messages to server: ", messages);
     const response = await api.post("/chat", { messages });
     return response.data;
 };

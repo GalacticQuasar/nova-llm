@@ -23,15 +23,18 @@ function ChatInterface() {
       setTimeout(() => setStartState(false), transitionDuration) // wait for fade duration
     }
 
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: prompt }]);
+    // Create updated messages array
+    const updatedMessages: Message[] = [...messages, { role: 'user' as const, content: prompt }];
+    
+    // Update state with new messages
+    setMessages(updatedMessages);
     setPrompt('');
 
     setIsLoading(true);
     try {
-      const response = await postChat(messages)
+      const response = await postChat(updatedMessages)
       console.log(response.llmResponse)
-      setMessages(prev => [...prev, { role: 'llm', content: response.llmResponse }])
+      setMessages(prev => [...prev, { role: 'model' as const, content: response.llmResponse }])
       setResponse(response.llmResponse)
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array

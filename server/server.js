@@ -36,20 +36,41 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-	// console.log("Received messages: ", req.body.messages);
+	console.log("Received messages: ", req.body.messages);
 
-	// const chat = ai.chats.create({
-	// 	model: "gemini-2.0-flash",
-	// 	history: req.body.messages,  // TODO: need to convert to gemini history format
-	// });
+	if (req.body.messages.length === 0) {
+		res.status(400).json({ error: "No messages received" });
+		return;
+	}
 
-	// const response = await chat.sendMessage(req.body.message);
+	/* Note: Gemini chat history format:
+	contents: [
+      {
+        role: "user",
+        parts: [{ text: "Hello" }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "Great to meet you. What would you like to know?" }],
+      },
+    ],*/
 
-	// console.log("Generated response: ", response.text);
-	// res.json({ llmResponse: response.text });
+	// Convert messages to Gemini chat history format
+	const geminiHistory = req.body.messages.map(message => ({
+		role: message.role,
+		parts: [{ text: message.content }],
+	}));
+
+	const response = await ai.models.generateContent({
+		model: "gemini-2.0-flash",
+		contents: geminiHistory,
+	});
+
+	console.log("Generated response: ", response.text);
+	res.json({ llmResponse: response.text });
 
 	// Testing:
-	res.json({ llmResponse: "<Simulated LLM Response>" });
+	//res.json({ llmResponse: "<Simulated LLM Response>" });
 });
 
 /* SERVER */
