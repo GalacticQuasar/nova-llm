@@ -47,7 +47,10 @@ app.post("/api/chat", async (req, res) => {
 	}
 
 	if (testing) {
-		res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
+		// Take 1 second to simulate realistic response time
+		setTimeout(() => {
+			res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
+		}, 1000);
 		return;
 	}
 

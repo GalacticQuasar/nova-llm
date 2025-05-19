@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { postChat } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
 
 function ChatInterface() {
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const [startState, setStartState] = useState(true)
   const [faded, setFaded] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -41,6 +42,17 @@ function ChatInterface() {
     }
   }
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  useEffect(() => {
+    // Scroll to bottom if loading a new message
+    if (isLoading) {
+      scrollToBottom()
+    }
+  }, [isLoading])
+
   useEffect(() => {
     // If startState is turning from true to false, simulate a click on the ChatInput to focus on textarea
     if (!startState) {
@@ -59,7 +71,7 @@ function ChatInterface() {
   
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
-      <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 py-6'}`}> {/* Compensate for scrollbar width */}
+      <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 pt-6'}`}> {/* Compensate for scrollbar width */}
         {!startState && (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((message, index) => (
@@ -68,10 +80,10 @@ function ChatInterface() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  className={`px-4 py-2 text-white ${
                     message.role === 'user'
-                      ? 'bg-teal-600 text-white'
-                      : 'bg-gray-700 text-teal-50'
+                      ? 'bg-secondary border-[1px] border-teal-300/50 shadow-teal-300/20 shadow-md max-w-[80%] rounded-2xl'
+                      : ''
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{message.content}</p>
@@ -80,11 +92,12 @@ function ChatInterface() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-700 text-teal-50 rounded-lg px-4 py-2">
+                <div className="px-4 py-2">
                   <p>Thinking...</p>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
