@@ -5,15 +5,14 @@ import { Send } from "lucide-react"
 export interface ChatInputProps {
   prompt: string
   setPrompt: (prompt: string) => void
-  isLoading: boolean
   onSend: () => void
 }
 
-export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputProps) {
+export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
-      className={`m-10 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+      className={`mb-4 w-180 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
       onClick={(e) => {
         const textarea = e.currentTarget.querySelector('textarea')
         if (textarea) {
@@ -22,7 +21,7 @@ export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputPro
       }}
     >
       <LLMTextarea 
-        className="w-160 font-mono" 
+        className="font-mono"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -32,7 +31,6 @@ export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputPro
         placeholder="Reply to Nova..."
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        disabled={isLoading}
       />
       <div className="flex justify-end">
         <Button 
@@ -40,7 +38,6 @@ export function ChatInput({ prompt, setPrompt, isLoading, onSend }: ChatInputPro
           size="icon" 
           className="font-semibold font-mono hover:text-teal-300" 
           onClick={onSend}
-          disabled={isLoading}
         >
           <Send className="scale-125" />
         </Button>
