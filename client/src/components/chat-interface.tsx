@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { postChat } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
@@ -39,6 +39,16 @@ function ChatInterface() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // If startState is turning from true to false, simulate a click on the ChatInput to focus on textarea
+    if (!startState) {
+      const chatInput = document.getElementById('chat-input-container')
+      if (chatInput) {
+        chatInput.click()
+      }
+    }
+  }, [startState])
   
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
