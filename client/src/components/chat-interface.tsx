@@ -17,12 +17,14 @@ function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
 
+  const transitionDuration = 200
+
   const handleSend = async () => {
     if (!prompt.trim() || isLoading) return;
 
     if (startState) {
       setFaded(true)
-      setTimeout(() => setStartState(false), 300) // wait for fade duration
+      setTimeout(() => setStartState(false), transitionDuration) // wait for fade duration
     }
 
     // Add user message
@@ -60,11 +62,11 @@ function ChatInterface() {
         {(!startState && isLoading) && <div className="mt-4 text-center text-gray-500">Loading...</div>}
         {(!startState && response) && <div className="mt-4 text-center text-gray-500"><p>{response}</p></div>}
       </div>
-      {startState && <h1 id="welcome-message" className={`text-center text-6xl font-serif flex items-center gap-4 transition-opacity duration-300 ${faded ? 'opacity-0' : 'opacity-100'}`}>
+      {startState && <h1 id="welcome-message" className={`text-center text-6xl font-serif flex items-center gap-4 transition-opacity duration-${transitionDuration} ${faded ? 'opacity-0' : 'opacity-100'}`}>
         <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />
         <span className="text-teal-300">Welcome,</span> User
       </h1>}
-      <div className={`flex justify-center ${startState ? '' : 'mt-auto'} transition-opacity duration-300 ${faded ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`flex justify-center ${startState ? '' : 'mt-auto'} transition-opacity duration-${transitionDuration} ${faded ? 'opacity-0' : 'opacity-100'}`}>
         {startState ? <ChatInputStart
           prompt={prompt}
           setPrompt={setPrompt}
