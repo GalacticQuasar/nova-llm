@@ -59,7 +59,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <div className="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0">
-                  <SidebarTrigger className="scale-125 hover:text-teal-300" />
+                  <SidebarTrigger className="scale-125 hover:text-teal-300 cursor-pointer" />
                   <a href="/">
                     <span className="ml-2 font-serif text-2xl">Nova</span>
                   </a>
