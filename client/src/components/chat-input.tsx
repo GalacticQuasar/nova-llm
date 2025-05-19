@@ -34,9 +34,8 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
       />
       <div className="flex justify-end">
         <Button 
-          variant="outline" 
           size="icon" 
-          className={`cursor-pointer ${prompt.length > 0 ? 'text-teal-300' : 'text-muted-foreground'}`}
+          className={`cursor-pointer border-1 ${prompt.length > 0 ? 'text-white bg-teal-400' : 'text-muted-foreground bg-transparent'}`}
           onClick={onSend}
         >
           <Send className="scale-125" />
