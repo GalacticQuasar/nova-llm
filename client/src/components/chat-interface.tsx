@@ -37,7 +37,7 @@ function ChatInterface() {
         <div
           id="chat-input-container"
           //TODO: ${startState ? 'm-10' : 'mt-auto mb-4'} 
-          className={`m-10 rounded-2xl p-3 border-1 focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+          className={`m-10 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
           onClick={(e) => {
             const textarea = e.currentTarget.querySelector('textarea')
             if (textarea) {
