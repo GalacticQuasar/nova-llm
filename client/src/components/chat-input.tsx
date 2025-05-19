@@ -1,12 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { LLMTextarea } from "@/components/llm-textarea"
 import { Send } from "lucide-react"
-
-export interface ChatInputProps {
-  prompt: string
-  setPrompt: (prompt: string) => void
-  onSend: () => void
-}
+import type { ChatInputProps } from "@/types/types"
 
 export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (

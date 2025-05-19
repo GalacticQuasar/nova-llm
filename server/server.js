@@ -36,20 +36,20 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-	/*
-	console.log("Received message: ", req.body.message);
+	// console.log("Received messages: ", req.body.messages);
 
-	const response = await ai.models.generateContent({
-		model: "gemini-2.0-flash",
-		contents: req.body.message,
-	});
+	// const chat = ai.chats.create({
+	// 	model: "gemini-2.0-flash",
+	// 	history: req.body.messages,  // TODO: need to convert to gemini history format
+	// });
 
-	console.log("Generated response: ", response.text);
-	res.json({ responseText: response.text });
-	*/
+	// const response = await chat.sendMessage(req.body.message);
+
+	// console.log("Generated response: ", response.text);
+	// res.json({ llmResponse: response.text });
 
 	// Testing:
-	res.json({ responseText: "<Simulated LLM Response>" });
+	res.json({ llmResponse: "<Simulated LLM Response>" });
 });
 
 /* SERVER */

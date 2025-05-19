@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react'
 import { postChat } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
-
-type Message = {
-  role: 'user' | 'llm'
-  content: string
-}
+import type { Message } from "@/types/types"
 
 function ChatInterface() {
   const [startState, setStartState] = useState(true)
@@ -28,17 +24,17 @@ function ChatInterface() {
     }
 
     // Add user message
-    const userMessage: Message = { role: 'user', content: prompt };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, { role: 'user', content: prompt }]);
     setPrompt('');
 
     setIsLoading(true);
     try {
-      const response = await postChat(prompt)
-      console.log(response.responseText)
-      setResponse(response.responseText)
+      const response = await postChat(messages)
+      console.log(response.llmResponse)
+      setMessages(prev => [...prev, { role: 'llm', content: response.llmResponse }])
+      setResponse(response.llmResponse)
     } catch (error) {
-      setIsError(true)  //TODO: Add error message with toast
+      setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
     } finally {
       setIsLoading(false)
     }
@@ -55,6 +51,10 @@ function ChatInterface() {
       setFaded(false)
     }
   }, [startState])
+
+  useEffect(() => {
+    console.log(messages)
+  }, [messages])
   
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>

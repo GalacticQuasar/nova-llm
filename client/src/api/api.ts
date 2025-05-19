@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Message } from "../types/types";
 
 export const api = axios.create({
 	baseURL: "http://localhost:3000/api",
@@ -12,7 +13,7 @@ export const getTest = async () => {
     return response.data;
 };
 
-export const postChat = async (message: string) => {
-    const response = await api.post("/chat", { message });
+export const postChat = async (messages: Message[]) => {
+    const response = await api.post("/chat", { messages });
     return response.data;
 };
