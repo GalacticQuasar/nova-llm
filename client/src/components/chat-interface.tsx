@@ -61,9 +61,34 @@ function ChatInterface() {
   
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
-      <div className={`${startState ? '' : 'flex-1 overflow-y-auto'}`}>
-        {(!startState && isLoading) && <div className="mt-4 text-center text-gray-500">Loading...</div>}
-        {(!startState && response) && <div className="mt-4 text-center text-gray-500"><p>{response}</p></div>}
+      <div className={`${startState ? '' : 'flex-1 overflow-y-auto px-4 py-6'}`}>
+        {!startState && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                    message.role === 'user'
+                      ? 'bg-teal-600 text-white'
+                      : 'bg-gray-700 text-teal-50'
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-700 text-teal-50 rounded-lg px-4 py-2">
+                  <p>Thinking...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {startState && <h1 id="welcome-message" className={`text-center text-6xl font-serif flex items-center gap-4 transition-opacity duration-${transitionDuration} ${faded ? 'opacity-0' : 'opacity-100'}`}>
         <img src="/Galactic-Logo.png" alt="Galactic Logo" className="h-16 w-16" />

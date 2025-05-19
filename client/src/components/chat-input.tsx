@@ -7,7 +7,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
-      className={`mb-3 w-180 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
+      className={`mb-3 w-full max-w-3xl mx-3 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
       onClick={(e) => {
         const textarea = e.currentTarget.querySelector('textarea')
         if (textarea) {
