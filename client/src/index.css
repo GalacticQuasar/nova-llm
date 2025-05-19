@@ -117,4 +117,21 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom Scrollbar Styles */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-input border-[1px] border-transparent border-solid bg-clip-padding;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ring;
+  }
 }

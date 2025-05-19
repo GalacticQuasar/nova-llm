@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
+const fs = require("fs");
 
 dotenv.config();
 
@@ -36,24 +37,15 @@ app.get("/api/test", (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
+	// Testing (return text from testing-response.txt)
+	res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
+	/*
 	console.log("Received messages: ", req.body.messages);
 
 	if (req.body.messages.length === 0) {
 		res.status(400).json({ error: "No messages received" });
 		return;
 	}
-
-	/* Note: Gemini chat history format:
-	contents: [
-      {
-        role: "user",
-        parts: [{ text: "Hello" }],
-      },
-      {
-        role: "model",
-        parts: [{ text: "Great to meet you. What would you like to know?" }],
-      },
-    ],*/
 
 	// Convert messages to Gemini chat history format
 	const geminiHistory = req.body.messages.map(message => ({
@@ -68,9 +60,7 @@ app.post("/api/chat", async (req, res) => {
 
 	console.log("Generated response: ", response.text);
 	res.json({ llmResponse: response.text });
-
-	// Testing:
-	//res.json({ llmResponse: "<Simulated LLM Response>" });
+	*/
 });
 
 /* SERVER */
