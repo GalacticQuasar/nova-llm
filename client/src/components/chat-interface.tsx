@@ -61,7 +61,7 @@ function ChatInterface() {
   
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
-      <div className={`${startState ? '' : 'flex-1 overflow-y-auto px-4 py-6'}`}>
+      <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 py-6'}`}> {/* Compensate for scrollbar width */}
         {!startState && (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((message, index) => (

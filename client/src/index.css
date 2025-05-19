@@ -118,7 +118,6 @@
     @apply bg-background text-foreground;
   }
 
-  /* Custom Scrollbar Styles */
   ::-webkit-scrollbar {
     @apply w-2 h-2.5;
   }
