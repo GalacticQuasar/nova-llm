@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo, memo } from 'react'
-import { postChat } from '@/api/api'
+import { postChat, postStream } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
@@ -29,7 +29,7 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
 })
 
 // Memoized message list component
-const MessageList = memo(({ messages, isLoading }: { messages: Message[], isLoading: boolean }) => {
+const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages: Message[], isLoading: boolean, streamingResponse: string }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -41,18 +41,25 @@ const MessageList = memo(({ messages, isLoading }: { messages: Message[], isLoad
   return (
     <div className="max-w-3xl mx-auto">
       {messages.map((message, index) => (
-        <div className="pt-6" ref={(index === messages.length - 1) ? messagesEndRef : null}>
+        <div key={`message-${index}`} className="pt-6" ref={(index === messages.length - 1) ? messagesEndRef : null}>
           <ChatMessage 
-          key={index} 
-          message={message} 
-          isLast={index != 1 && index === messages.length - 1}
+            message={message} 
+            isLast={index != 1 && index === messages.length - 1}
           />
         </div>
       ))}
-      {isLoading && (
-        <div className={`flex justify-start ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
+      {streamingResponse && (
+        <div key="streaming-response" className="pt-6">
+          <ChatMessage 
+            message={{ role: 'model', content: streamingResponse }}
+            isLast={messages.length > 2}
+          />
+        </div>
+      )}
+      {isLoading && !streamingResponse && (
+        <div key="loading" className={`flex justify-start pt-6 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
           <div className="px-4 py-2">
-           <p>Thinking...</p>
+            <p>Thinking...</p>
           </div>
         </div>
       )}
@@ -67,13 +74,14 @@ function ChatInterface() {
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
+  const [streamingResponse, setStreamingResponse] = useState("")
 
   const transitionDuration = 200
 
   // Memoize the message list to prevent unnecessary re-renders
   const messageList = useMemo(() => (
-    <MessageList messages={messages} isLoading={isLoading} />
-  ), [messages, isLoading])
+    <MessageList messages={messages} isLoading={isLoading} streamingResponse={streamingResponse} />
+  ), [messages, isLoading, streamingResponse])
 
   const handleSend = async () => {
     if (!prompt.trim() || isLoading) return;
@@ -92,10 +100,28 @@ function ChatInterface() {
 
     setIsLoading(true);
     try {
-      const response = await postChat(updatedMessages)
-      setMessages(prev => [...prev, { role: 'model' as const, content: response.llmResponse }])
+      const stream = await postStream(updatedMessages);
+      if (!stream) throw new Error('No stream received');
+
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        fullResponse += chunk;
+        setStreamingResponse(fullResponse);
+      }
+
+      // Once streaming is complete, add the full response to messages
+      setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
+      setStreamingResponse('');
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
+      console.error('Streaming error:', error);
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +141,7 @@ function ChatInterface() {
 
   return (
     <div className={`font-serif dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
-      <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 pt-6'}`}>
+      <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 py-6'}`}>
         {!startState && messageList}
       </div>
       {startState && <h1 id="welcome-message" className={`text-center text-6xl font-serif flex items-center gap-4 transition-opacity duration-${transitionDuration} ${faded ? 'opacity-0' : 'opacity-100'}`}>
