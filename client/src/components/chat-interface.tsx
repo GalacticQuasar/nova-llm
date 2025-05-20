@@ -9,7 +9,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer"
 const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
   return (
     <div
-      className={`flex ${message.role === 'user' ? 'justify-end px-4' : `${isLast ? 'min-h-[calc(100dvh-215px)]' : ''}`}`}
+      className={`flex ${message.role === 'user' ? 'justify-end px-4' : `${isLast ? 'min-h-[calc(100dvh-2px)]' : ''}`}`}
     >
       <div
         className={`px-4 py-2 text-white ${
@@ -39,22 +39,23 @@ const MessageList = memo(({ messages, isLoading }: { messages: Message[], isLoad
   }, [isLoading])
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto">
       {messages.map((message, index) => (
-        <ChatMessage 
+        <div className="pt-6" ref={(index === messages.length - 1) ? messagesEndRef : null}>
+          <ChatMessage 
           key={index} 
           message={message} 
           isLast={index === messages.length - 1} 
-        />
+          />
+        </div>
       ))}
       {isLoading && (
-        <div className="flex justify-start min-h-[calc(100dvh-215px)]">
+        <div className="flex justify-start min-h-[calc(100dvh-2px)]">
           <div className="px-4 py-2">
            <p>Thinking...</p>
           </div>
         </div>
       )}
-      <div ref={messagesEndRef} />
     </div>
   )
 })
