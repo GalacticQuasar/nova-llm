@@ -3,6 +3,7 @@ import { postChat } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
+import ReactMarkdown from 'react-markdown'
 
 function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -33,7 +34,7 @@ function ChatInterface() {
     setIsLoading(true);
     try {
       const response = await postChat(updatedMessages)
-      console.log(response.llmResponse)
+      console.log("Response: ", response.llmResponse)
       setMessages(prev => [...prev, { role: 'model' as const, content: response.llmResponse }])
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
@@ -65,10 +66,6 @@ function ChatInterface() {
     }
   }, [startState])
 
-  useEffect(() => {
-    console.log(messages)
-  }, [messages])
-  
   return (
     <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
       <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 pt-6'}`}> {/* Compensate for scrollbar width */}
@@ -77,16 +74,22 @@ function ChatInterface() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : ''}`}
               >
                 <div
                   className={`px-4 py-2 text-white ${
                     message.role === 'user'
-                      ? 'bg-secondary border-[1px] border-teal-300/50 shadow-teal-300/20 shadow-md max-w-[80%] rounded-2xl'
-                      : ''
+                      ? 'bg-secondary border-[1px] border-teal-300 shadow-teal-300/20 shadow-md max-w-[80%] rounded-2xl'
+                      : 'max-w-full'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                  {message.role === 'user' ? (
+                    <p className="break-words">{message.content}</p>
+                  ) : (
+                    <article className="prose dark:prose-invert prose-md max-w-none">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </article>
+                  )}
                 </div>
               </div>
             ))}

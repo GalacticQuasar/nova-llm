@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -133,4 +134,28 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-ring;
   }
+
+  
+  .markdown > * {
+    all: revert;
+  }
+
+  /*
+  .markdown h1 {
+    font-size: 1.5rem;
+  }
+    
+  .markdown h2 {
+    font-size: 1.25rem;
+  }
+    
+  .markdown h3 {
+    font-size: 1rem;
+  }
+    
+  .markdown p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  */
 }
