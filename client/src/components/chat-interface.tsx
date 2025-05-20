@@ -67,19 +67,19 @@ function ChatInterface() {
   }, [startState])
 
   return (
-    <div className={`dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
+    <div className={`font-serif dark text-teal-50 flex flex-col ${startState ? 'items-center' : ''} justify-center h-screen`}>
       <div className={`${startState ? '' : 'flex-1 overflow-y-auto pl-4 pr-2 pt-6'}`}> {/* Compensate for scrollbar width */}
         {!startState && (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : ''}`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : `${index === messages.length - 1 ? 'min-h-[calc(100dvh-210px)]' : ''}`}`}
               >
                 <div
                   className={`px-4 py-2 text-white ${
                     message.role === 'user'
-                      ? 'bg-secondary border-[1px] border-teal-300 shadow-teal-300/20 shadow-md max-w-[80%] rounded-2xl'
+                      ? 'bg-secondary border-[1px] border-teal-300 shadow-teal-300/20 shadow-md max-w-[80%] rounded-lg'
                       : 'max-w-full'
                   }`}
                 >
@@ -92,7 +92,7 @@ function ChatInterface() {
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start min-h-[calc(100dvh-210px)]">
                 <div className="px-4 py-2">
                   <p>Thinking...</p>
                 </div>

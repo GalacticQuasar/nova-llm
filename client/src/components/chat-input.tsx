@@ -7,7 +7,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
-      className={`mb-3 w-full max-w-3xl mx-3 rounded-2xl p-3 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 transition-all duration-300 cursor-text`}
+      className={`mb-3 w-full max-w-3xl mx-3 rounded-xl p-2 border-1 bg-secondary focus-within:border-teal-300/100 hover:border-teal-300/100 hover:shadow-teal-300/20 focus-within:shadow-teal-300/20 shadow-md transition-all duration-300 cursor-text`}
       onClick={(e) => {
         const textarea = e.currentTarget.querySelector('textarea')
         if (textarea) {
@@ -16,7 +16,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
       }}
     >
       <LLMTextarea
-        className="font-mono"
+        className=""
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -30,7 +30,7 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
       <div className="flex justify-end">
         <Button 
           size="icon" 
-          className={`cursor-pointer border-1 ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none'}`}
+          className={`cursor-pointer border-1 rounded-lg ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none'}`}
           onClick={onSend}
         >
           <Send className="scale-125" />
