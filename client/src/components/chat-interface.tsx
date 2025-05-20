@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useMemo, memo } from 'react'
-import { postChat, postStream } from '@/api/api'
+import { postStream } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
+import { toast } from "sonner"
 
 // Memoized message component to prevent unnecessary re-renders
 const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
@@ -122,6 +123,7 @@ function ChatInterface() {
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
       console.error('Streaming error:', error);
+      toast.error('Error streaming response. Please try again.')
     } finally {
       setIsLoading(false)
     }
