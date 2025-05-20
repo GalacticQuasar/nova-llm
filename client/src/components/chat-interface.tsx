@@ -3,7 +3,7 @@ import { postChat } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
-import ReactMarkdown from 'react-markdown'
+import MarkdownRenderer from "@/components/MarkdownRenderer"
 
 function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -86,9 +86,7 @@ function ChatInterface() {
                   {message.role === 'user' ? (
                     <p className="break-words">{message.content}</p>
                   ) : (
-                    <article className="prose dark:prose-invert prose-md max-w-none">
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
-                    </article>
+                    <MarkdownRenderer markdown={message.content} />
                   )}
                 </div>
               </div>

@@ -158,4 +158,9 @@
     line-height: 1.5;
   }
   */
+
+  code::before,
+  code::after {
+    content: none !important;
+  }
 }
