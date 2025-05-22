@@ -104,7 +104,7 @@ function ChatInterface() {
       const stream = await postStream(updatedMessages);
       if (!stream) throw new Error('No stream received');
 
-      const fullResponse = await streamByWord(stream, 10);
+      const fullResponse = await streamByWord(stream);
 
       // Once streaming is complete, add the full response to messages
       setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
@@ -173,6 +173,42 @@ function ChatInterface() {
           fullResponse += word;
           setStreamingResponse(fullResponse);
         }
+      }
+    }
+
+    return fullResponse;
+  }
+
+  const streamByCharacter = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>, delay: number = 0) => {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        // Add any remaining characters in buffer
+        if (buffer) {
+          fullResponse += buffer;
+          setStreamingResponse(fullResponse);
+        }
+        break;
+      }
+      
+      const chunk = decoder.decode(value);
+      buffer += chunk;
+
+      // Process characters one at a time
+      while (buffer.length > 0) {
+        const char = buffer[0];
+        buffer = buffer.slice(1);
+        
+        fullResponse += char;
+        setStreamingResponse(fullResponse);
+        
+        // Add a small delay between characters for smoother animation
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
