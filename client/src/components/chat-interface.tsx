@@ -20,7 +20,7 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
         }`}
       >
         {message.role === 'user' ? (
-          <p className="break-words">{message.content}</p>
+          <p className="break-words whitespace-pre-wrap">{message.content}</p>
         ) : (
           <MarkdownRenderer markdown={message.content} />
         )}
