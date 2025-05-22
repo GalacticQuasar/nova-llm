@@ -23,6 +23,13 @@ const MarkdownRenderer = ({ markdown }: props) => {
                             </code>
                         )
                     },
+                    img: ({node, ...props}) => (
+                        <img
+                          {...props}
+                          style={{ borderRadius: '8px' }}
+                          alt={props.alt}
+                        />
+                    )
                 }}
             >
                 {markdown}

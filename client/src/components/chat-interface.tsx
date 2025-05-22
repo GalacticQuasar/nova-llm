@@ -32,10 +32,44 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
 // Memoized message list component
 const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages: Message[], isLoading: boolean, streamingResponse: string }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const loadingRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Auto scroll to user message or, if user message is too long, scroll to loading message
+
     if (isLoading) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      const lastMessage = messagesEndRef.current
+      const loadingMessage = loadingRef.current
+      
+      if (lastMessage && loadingMessage) {
+        // Check if the last message height is more than 50vh
+        const lastMessageHeight = lastMessage.getBoundingClientRect().height
+        const viewportHeight = window.innerHeight
+        
+        // If the last message is taller than half the viewport, scroll to loading
+        if (lastMessageHeight > viewportHeight * 0.5) {
+          // We can find the nearest scrollable ancestor.
+          const scrollableParent = loadingMessage.closest('.overflow-y-auto');
+
+          if (scrollableParent) {
+            const loadingMessageRect = loadingMessage.getBoundingClientRect();
+            const parentRect = scrollableParent.getBoundingClientRect();
+
+            // This is the current scroll position of the parent + the distance from the parent's top edge to the element's top edge - the offset.
+            const targetScrollTop = scrollableParent.scrollTop + loadingMessageRect.top - parentRect.top - 60;
+
+            scrollableParent.scrollTo({
+              top: targetScrollTop,
+              behavior: "smooth"
+            });
+          } else {
+            // Fallback to default scrollIntoView if scrollable parent not found
+            loadingMessage.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        } else {
+          lastMessage.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      }
     }
   }, [isLoading])
 
@@ -58,7 +92,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
         </div>
       )}
       {isLoading && !streamingResponse && (
-        <div key="loading" className={`flex justify-start pt-6 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
+        <div key="loading" ref={loadingRef} className={`flex justify-start pt-6 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
           <div className="px-4 py-2">
             <p>Thinking...</p>
           </div>
