@@ -109,7 +109,7 @@ app.post("/api/stream", async (req, res) => {
 
 		console.log("Streaming response: ", response);
 		for await (const chunk of response) {
-			console.log(chunk.text);
+			process.stdout.write(chunk.text);
 			res.write(chunk.text);
 		}
 		console.log("Streaming response complete");
