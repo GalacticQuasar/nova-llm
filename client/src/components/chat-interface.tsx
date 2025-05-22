@@ -143,6 +143,7 @@ function ChatInterface() {
       const fullResponse = await streamByWord(stream);
 
       // Once streaming is complete, add the full response to messages
+      console.log('Full response:', fullResponse);
       setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
       setStreamingResponse('');
     } catch (error) {
@@ -184,48 +185,43 @@ function ChatInterface() {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let fullResponse = '';
-    let currentWord = '';
     let buffer = '';
-
-    const updateWord = () => {
-      if (currentWord) {
-        fullResponse += currentWord + ' ';
-        setStreamingResponse(fullResponse);
-        currentWord = '';
-      }
-    };
 
     try {
       while (!abortController.current.aborted) {
         const { done, value } = await reader.read();
-        if (done) {
-          updateWord();
-          break;
-        }
+        if (done) break;
         if (abortController.current.aborted) break;
         
         const chunk = decoder.decode(value);
         buffer += chunk;
 
-        // Process complete words from the buffer
+        // Process complete words from the buffer, keeping original spacing
         const words = buffer.split(/(\s+)/);
         buffer = words.pop() || ''; // Keep last partial word in buffer
 
         for (const word of words) {
           if (abortController.current.aborted) break;
           
+          // Add the word (or whitespace) to the response
+          fullResponse += word;
+          
+          // Only add delay for actual words, not whitespace
           if (word.trim()) {
-            currentWord = word;
-            await new Promise(resolve => setTimeout(resolve, delay));  // Delay between words for smoother animation
-            updateWord();
-          } else if (word) {
-            fullResponse += word;
-            setStreamingResponse(fullResponse);
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
+          
+          setStreamingResponse(fullResponse);
         }
       }
     } finally {
       reader.releaseLock();
+    }
+
+    // Add any remaining text from buffer
+    if (buffer) {
+      fullResponse += buffer;
+      setStreamingResponse(fullResponse);
     }
 
     return fullResponse;
