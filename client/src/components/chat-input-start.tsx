@@ -16,7 +16,7 @@ export function ChatInputStart({ prompt, setPrompt, onSend }: ChatInputProps) {
       }}
     >
       <LLMTextarea 
-        className="min-h-18" 
+        className="min-h-18 max-h-100" 
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -27,7 +27,7 @@ export function ChatInputStart({ prompt, setPrompt, onSend }: ChatInputProps) {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
-      <div className="flex justify-end">
+      <div className="mt-2 flex justify-end">
         <Button
           size="icon" 
           className={`cursor-pointer border-1 rounded-lg ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none'}`}
