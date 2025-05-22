@@ -104,18 +104,7 @@ function ChatInterface() {
       const stream = await postStream(updatedMessages);
       if (!stream) throw new Error('No stream received');
 
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        fullResponse += chunk;
-        setStreamingResponse(fullResponse);
-      }
+      const fullResponse = await streamByWord(stream, 10);
 
       // Once streaming is complete, add the full response to messages
       setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
@@ -129,6 +118,67 @@ function ChatInterface() {
     }
   }
 
+  const streamByChunk = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      fullResponse += chunk;
+      setStreamingResponse(fullResponse);
+    }
+
+    return fullResponse;
+  }
+
+  const streamByWord = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>, delay: number = 10) => {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let currentWord = '';
+    let buffer = '';
+
+    const updateWord = () => {
+      if (currentWord) {
+        fullResponse += currentWord + ' ';
+        setStreamingResponse(fullResponse);
+        currentWord = '';
+      }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        updateWord(); // Add any remaining word
+        break;
+      }
+      
+      const chunk = decoder.decode(value);
+      buffer += chunk;
+
+      // Process complete words from the buffer
+      const words = buffer.split(/(\s+)/);
+      buffer = words.pop() || ''; // Keep last partial word in buffer
+
+      for (const word of words) {
+        if (word.trim()) {
+          currentWord = word;
+          await new Promise(resolve => setTimeout(resolve, delay));  // Delay between words for smoother animation
+          updateWord();
+        } else if (word) {
+          fullResponse += word;
+          setStreamingResponse(fullResponse);
+        }
+      }
+    }
+
+    return fullResponse;
+  }
+  
   useEffect(() => {
     // If startState is turning from true to false, simulate a click on the ChatInput to focus on textarea
     if (!startState) {
