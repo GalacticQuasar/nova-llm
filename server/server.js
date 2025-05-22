@@ -107,7 +107,7 @@ app.post("/api/stream", async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		console.log("Streaming response: ", response);
+		console.log("Streaming response:");
 		for await (const chunk of response) {
 			process.stdout.write(chunk.text);
 			res.write(chunk.text);

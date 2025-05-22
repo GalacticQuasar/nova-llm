@@ -7,4 +7,6 @@ export interface ChatInputProps {
     prompt: string
     setPrompt: (prompt: string) => void
     onSend: () => void
+    onStop: () => void
+    isLoading: boolean
   }

@@ -110,6 +110,7 @@ function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [streamingResponse, setStreamingResponse] = useState("")
+  const abortController = useRef<{ aborted: boolean }>({ aborted: false });
 
   const transitionDuration = 200
 
@@ -132,6 +133,7 @@ function ChatInterface() {
     // Update state with new messages
     setMessages(updatedMessages);
     setPrompt('');
+    abortController.current.aborted = false;
 
     setIsLoading(true);
     try {
@@ -152,18 +154,27 @@ function ChatInterface() {
     }
   }
 
+  const handleStop = () => {
+    console.log('Aborting...')
+    abortController.current.aborted = true;
+  }
+
   const streamByChunk = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let fullResponse = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      const chunk = decoder.decode(value);
-      fullResponse += chunk;
-      setStreamingResponse(fullResponse);
+    try {
+      while (!abortController.current.aborted) {
+        const { done, value } = await reader.read();
+        if (done || abortController.current.aborted) break;
+        
+        const chunk = decoder.decode(value);
+        fullResponse += chunk;
+        setStreamingResponse(fullResponse);
+      }
+    } finally {
+      reader.releaseLock();
     }
 
     return fullResponse;
@@ -184,30 +195,37 @@ function ChatInterface() {
       }
     };
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        updateWord(); // Add any remaining word
-        break;
-      }
-      
-      const chunk = decoder.decode(value);
-      buffer += chunk;
-
-      // Process complete words from the buffer
-      const words = buffer.split(/(\s+)/);
-      buffer = words.pop() || ''; // Keep last partial word in buffer
-
-      for (const word of words) {
-        if (word.trim()) {
-          currentWord = word;
-          await new Promise(resolve => setTimeout(resolve, delay));  // Delay between words for smoother animation
+    try {
+      while (!abortController.current.aborted) {
+        const { done, value } = await reader.read();
+        if (done) {
           updateWord();
-        } else if (word) {
-          fullResponse += word;
-          setStreamingResponse(fullResponse);
+          break;
+        }
+        if (abortController.current.aborted) break;
+        
+        const chunk = decoder.decode(value);
+        buffer += chunk;
+
+        // Process complete words from the buffer
+        const words = buffer.split(/(\s+)/);
+        buffer = words.pop() || ''; // Keep last partial word in buffer
+
+        for (const word of words) {
+          if (abortController.current.aborted) break;
+          
+          if (word.trim()) {
+            currentWord = word;
+            await new Promise(resolve => setTimeout(resolve, delay));  // Delay between words for smoother animation
+            updateWord();
+          } else if (word) {
+            fullResponse += word;
+            setStreamingResponse(fullResponse);
+          }
         }
       }
+    } finally {
+      reader.releaseLock();
     }
 
     return fullResponse;
@@ -219,7 +237,7 @@ function ChatInterface() {
     let fullResponse = '';
     let buffer = '';
 
-    while (true) {
+    while (!abortController.current.aborted) {
       const { done, value } = await reader.read();
       if (done) {
         // Add any remaining characters in buffer
@@ -275,10 +293,14 @@ function ChatInterface() {
           prompt={prompt}
           setPrompt={setPrompt}
           onSend={handleSend}
+          onStop={handleStop}
+          isLoading={isLoading}
         /> : <ChatInput
           prompt={prompt}
           setPrompt={setPrompt}
           onSend={handleSend}
+          onStop={handleStop}
+          isLoading={isLoading}
         />}
       </div>
     </div>

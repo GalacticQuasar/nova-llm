@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { LLMTextarea } from "@/components/llm-textarea"
 import { Send } from "lucide-react"
 import type { ChatInputProps } from "@/types/types"
+import { CircleStop } from "lucide-react"
 
-export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
+export function ChatInput({ prompt, setPrompt, onSend, onStop, isLoading }: ChatInputProps) {
   return (
     <div
       id="chat-input-container"
@@ -30,10 +31,10 @@ export function ChatInput({ prompt, setPrompt, onSend }: ChatInputProps) {
       <div className="mt-2 flex justify-end">
         <Button 
           size="icon" 
-          className={`cursor-pointer border-1 rounded-lg ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none'}`}
-          onClick={onSend}
+          className={`cursor-pointer border-1 rounded-lg ${isLoading ? ('text-white bg-transparent hover:bg-red-600') : (prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none')}`}
+          onClick={isLoading ? onStop : onSend}
         >
-          <Send className="scale-125" />
+          {isLoading ? <CircleStop className="scale-125" /> : <Send className="scale-125" />}
         </Button>
       </div>
     </div>
