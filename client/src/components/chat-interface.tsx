@@ -11,7 +11,7 @@ import { Copy, Loader } from 'lucide-react'
 const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
   return (
     <div
-      className={`${message.role === 'user' ? '' : `${isLast ? 'min-h-[calc(100dvh-120px)]' : ''}`}`}
+      className={`${message.role === 'user' ? '' : `${isLast ? 'min-h-[calc(100dvh-140px)]' : ''}`}`}
     >
       <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
         <div
@@ -105,7 +105,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
         </div>
       )}
       {isLoading && !streamingResponse && (
-        <div key="loading" ref={loadingRef} className={`flex justify-start px-2 pt-1 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
+        <div key="loading" ref={loadingRef} className={`flex justify-start px-2 pt-1 ${messages.length > 2 ? 'min-h-[calc(100dvh-140px)]' : ''}`}>
           <Loader className="animate-spin text-teal-300" size={20} />
         </div>
       )}
