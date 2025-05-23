@@ -8,7 +8,7 @@ interface props {
 
 const MarkdownRenderer = ({ markdown }: props) => {
     return (
-        <article className="prose dark:prose-invert max-w-none">
+        <article className="prose dark:prose-invert prose-img:rounded-lg max-w-none">
             <Markdown
                 components={{
                     code: ({ className, children, ...props }) => {
@@ -23,13 +23,6 @@ const MarkdownRenderer = ({ markdown }: props) => {
                             </code>
                         )
                     },
-                    img: ({node, ...props}) => (
-                        <img
-                          {...props}
-                          style={{ borderRadius: '8px' }}
-                          alt={props.alt}
-                        />
-                    )
                 }}
             >
                 {markdown}

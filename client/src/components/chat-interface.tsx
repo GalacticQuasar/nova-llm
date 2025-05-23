@@ -5,25 +5,38 @@ import { ChatInput } from "@/components/chat-input"
 import type { Message } from "@/types/types"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
 import { toast } from "sonner"
+import { Copy, Loader } from 'lucide-react'
 
 // Memoized message component to prevent unnecessary re-renders
 const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
   return (
     <div
-      className={`flex ${message.role === 'user' ? 'justify-end px-4' : `${isLast ? 'min-h-[calc(100dvh-120px)]' : ''}`}`}
+      className={`${message.role === 'user' ? '' : `${isLast ? 'min-h-[calc(100dvh-120px)]' : ''}`}`}
     >
-      <div
-        className={`px-4 py-2 text-white ${
+      <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+        <div
+          className={`text-white ${
           message.role === 'user'
-            ? 'bg-secondary border-[1px] border-teal-300 shadow-teal-300/20 shadow-md max-w-[80%] rounded-lg'
-            : 'max-w-full'
-        }`}
-      >
-        {message.role === 'user' ? (
+          ? 'px-4 py-2 bg-secondary border-[1px] border-teal-300 shadow-teal-300/20 shadow-md max-w-[80%] rounded-lg'
+          : 'max-w-full'
+          }`}
+        >
+          {message.role === 'user' ? (
           <p className="break-words whitespace-pre-wrap">{message.content}</p>
-        ) : (
+          ) : (
           <MarkdownRenderer markdown={message.content} />
-        )}
+          )}
+        </div>
+      </div>
+      <div className={`flex ${message.role === 'user' ? 'justify-end pt-4' : 'justify-start pt-2'} group`}>
+        <Copy
+          className="text-teal-300 cursor-pointer hover:text-teal-500 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+          onClick={() => {
+            navigator.clipboard.writeText(message.content.trim())
+            toast.success('Message copied to clipboard!')
+          }}
+          size={16}
+        />
       </div>
     </div>
   )
@@ -76,7 +89,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
   return (
     <div className="max-w-3xl mx-auto">
       {messages.map((message, index) => (
-        <div key={`message-${index}`} className="pt-6" ref={(index === messages.length - 1) ? messagesEndRef : null}>
+        <div key={`message-${index}`} className={`px-2 ${message.role == 'user' ? 'pt-4' : ''}`} ref={(index === messages.length - 1) ? messagesEndRef : null}>
           <ChatMessage 
             message={message} 
             isLast={index != 1 && index === messages.length - 1}
@@ -84,7 +97,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
         </div>
       ))}
       {streamingResponse && (
-        <div key="streaming-response" className="pt-6">
+        <div key="streaming-response" className="px-2">
           <ChatMessage 
             message={{ role: 'model', content: streamingResponse }}
             isLast={messages.length > 2}
@@ -92,10 +105,8 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
         </div>
       )}
       {isLoading && !streamingResponse && (
-        <div key="loading" ref={loadingRef} className={`flex justify-start pt-6 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
-          <div className="px-4 py-2">
-            <p>Thinking...</p>
-          </div>
+        <div key="loading" ref={loadingRef} className={`flex justify-start px-2 pt-1 ${messages.length > 2 ? 'min-h-[calc(100dvh-120px)]' : ''}`}>
+          <Loader className="animate-spin text-teal-300" size={20} />
         </div>
       )}
     </div>
