@@ -28,7 +28,7 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
           )}
         </div>
       </div>
-      <div className={`flex ${message.role === 'user' ? 'justify-end pt-4' : 'justify-start pt-2'} group`}>
+      <div className={`flex ${message.role === 'user' ? 'justify-end pt-4 pb-2' : 'justify-start pt-2'} group`}>
         <Copy
           className="text-teal-300 cursor-pointer hover:text-teal-500 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
           onClick={() => {
