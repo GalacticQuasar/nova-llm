@@ -12,8 +12,8 @@ const port = process.env.PORT || 3000;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const getTime = async (location) => {
-	// const time = new Date().toLocaleTimeString("en-US", { timeZone: location });
-	return "The current time is 1:42 PM";
+	const time = new Date().toLocaleTimeString("en-US", { timeZone: location });
+	return time;
 };
 
 const geminiConfig = {
@@ -27,7 +27,7 @@ const geminiConfig = {
 			properties: {
 				location: {
 					type: Type.STRING,
-					description: "The location to get the time for",
+					description: "The time zone to get the time for",
 				},
 			},
 		},
@@ -133,14 +133,13 @@ app.post("/api/stream", async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		let hasFunctionCall = false;
-		let functionCall = null;
-		while (true) {
+		let functionCall;
+		do {
+			functionCall = null;
 			console.log("Streaming response:");
 			for await (const chunk of response) {
 				if (chunk.functionCalls) {
 					console.log("Function call: ", chunk.functionCalls[0]);
-					hasFunctionCall = true;
 					functionCall = chunk.functionCalls[0];
 					break;
 				}
@@ -149,9 +148,8 @@ app.post("/api/stream", async (req, res) => {
 				res.write(chunk.text);
 			}
 
-			if (hasFunctionCall) {
-				//const functionCall = chunk.functionCalls[0];
-
+			if (functionCall) {
+				console.log("Handling function call: ", functionCall);
 				let result = await handleFunctionCall(functionCall);
 				console.log(`Function execution result: ${JSON.stringify(result)}`);
 
@@ -179,12 +177,8 @@ app.post("/api/stream", async (req, res) => {
 						tools: [{ functionDeclarations: geminiConfig.functionDeclarations }],
 					},
 				});
-
-				hasFunctionCall = false; // Reset for next iteration
-			} else {
-				break;
 			}
-		}
+		} while (functionCall)
 
 		console.log("Streaming response complete");
 
