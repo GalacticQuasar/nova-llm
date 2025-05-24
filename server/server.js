@@ -1,20 +1,45 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenAI, Type } = require("@google/genai");
 const fs = require("fs");
 
 dotenv.config();
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const app = express();
 const port = process.env.PORT || 3000;
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const getTime = async (location) => {
+	// const time = new Date().toLocaleTimeString("en-US", { timeZone: location });
+	return "The current time is 1:42 PM";
+};
 
 const geminiConfig = {
 	model: "gemini-2.0-flash",
 	systemInstruction: "You are Nova, a knowldegeable and professional assistant.",
+	functionDeclarations: [{
+		name: "get_time",
+		description: "Get the current time",
+		parameters: {
+			type: Type.OBJECT,
+			properties: {
+				location: {
+					type: Type.STRING,
+					description: "The location to get the time for",
+				},
+			},
+		},
+	}],
 };
+
+async function handleFunctionCall(functionCall) {
+	if (functionCall.name === "get_time") {
+		return await getTime(functionCall.parameters);
+	}
+	return null;
+}
 
 /* MIDDLEWARE */
 
@@ -94,11 +119,12 @@ app.post("/api/stream", async (req, res) => {
 			parts: [{ text: message.content }],
 		}));
 
-		const response = await ai.models.generateContentStream({
+		let response = await ai.models.generateContentStream({
 			model: geminiConfig.model,
 			contents: geminiHistory,
 			config: {
 				systemInstruction: geminiConfig.systemInstruction,
+				tools: [{ functionDeclarations: geminiConfig.functionDeclarations }],
 			},
 		});
 		
@@ -107,11 +133,59 @@ app.post("/api/stream", async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		console.log("Streaming response:");
-		for await (const chunk of response) {
-			process.stdout.write(chunk.text);
-			res.write(chunk.text);
+		let hasFunctionCall = false;
+		let functionCall = null;
+		while (true) {
+			console.log("Streaming response:");
+			for await (const chunk of response) {
+				if (chunk.functionCalls) {
+					console.log("Function call: ", chunk.functionCalls[0]);
+					hasFunctionCall = true;
+					functionCall = chunk.functionCalls[0];
+					break;
+				}
+
+				process.stdout.write(chunk.text);
+				res.write(chunk.text);
+			}
+
+			if (hasFunctionCall) {
+				//const functionCall = chunk.functionCalls[0];
+
+				let result = await handleFunctionCall(functionCall);
+				console.log(`Function execution result: ${JSON.stringify(result)}`);
+
+				const functionResponse = {
+					name: functionCall.name,
+					response: { result },
+				};
+
+				// Append function call and result to geminiHistory
+				geminiHistory.push({
+					role: "model",
+					parts: [{ functionCall: functionCall }],
+				});
+
+				geminiHistory.push({
+					role: "user",
+					parts: [{ functionResponse: functionResponse }],
+				});
+
+				response = await ai.models.generateContentStream({
+					model: geminiConfig.model,
+					contents: geminiHistory,
+					config: {
+						systemInstruction: geminiConfig.systemInstruction,
+						tools: [{ functionDeclarations: geminiConfig.functionDeclarations }],
+					},
+				});
+
+				hasFunctionCall = false; // Reset for next iteration
+			} else {
+				break;
+			}
 		}
+
 		console.log("Streaming response complete");
 
 		res.end();
