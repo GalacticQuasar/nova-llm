@@ -5,14 +5,17 @@ import App from './App.tsx'
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
+import { ConfigProvider } from "@/contexts/config-context"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <SidebarProvider>
-        <App />
-        <Toaster />
-      </SidebarProvider>
+      <ConfigProvider>
+        <SidebarProvider>
+          <App />
+          <Toaster />
+        </SidebarProvider>
+      </ConfigProvider>
     </ThemeProvider>
   </StrictMode>,
 )

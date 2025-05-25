@@ -6,6 +6,7 @@ import type { Message } from "@/types/types"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
 import { toast } from "sonner"
 import { Copy, Loader } from 'lucide-react'
+import { useConfig } from '@/contexts/config-context'
 
 // Memoized message component to prevent unnecessary re-renders
 const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
@@ -114,6 +115,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
 })
 
 function ChatInterface() {
+  const { config } = useConfig()
   const [startState, setStartState] = useState(true)
   const [faded, setFaded] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -148,7 +150,7 @@ function ChatInterface() {
 
     setIsLoading(true);
     try {
-      const stream = await postStream(updatedMessages);
+      const stream = await postStream(updatedMessages, config);
       if (!stream) throw new Error('No stream received');
 
       const fullResponse = await streamByWord(stream);

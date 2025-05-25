@@ -95,6 +95,7 @@ app.post("/api/chat", async (req, res) => {
 	const testing = false; // Remove this for production
 
 	console.log("Received messages: ", req.body.messages);
+	console.log("Received config: ", req.body.config);
 
 	if (req.body.messages.length === 0) {
 		res.status(400).json({ error: "No messages received" });
@@ -109,6 +110,12 @@ app.post("/api/chat", async (req, res) => {
 		return;
 	}
 
+	// Use config from request or fallback to default
+	const config = req.body.config || { model: geminiConfig.model, tools: { get_time: true, get_random_number: true } };
+	
+	console.log(`Using model: ${config.model}`);
+	console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
+
 	// Convert messages to Gemini chat history format
 	const geminiHistory = req.body.messages.map(message => ({
 		role: message.role,
@@ -116,7 +123,7 @@ app.post("/api/chat", async (req, res) => {
 	}));
 
 	const response = await ai.models.generateContent({
-		model: geminiConfig.model,
+		model: config.model,
 		contents: geminiHistory,
 		config: {
 			systemInstruction: geminiConfig.systemInstruction,
@@ -131,11 +138,23 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/stream", async (req, res) => {
 	try {
 		console.log("Received messages: ", req.body.messages);
+		console.log("Received config: ", req.body.config);
 
 		if (req.body.messages.length === 0) {
 			res.status(400).json({ error: "No messages received" });
 			return;
 		}
+
+		// Use config from request or fallback to default
+		const config = req.body.config || { model: geminiConfig.model, tools: { get_time: true, get_random_number: true } };
+		
+		console.log(`Using model: ${config.model}`);
+		console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
+
+		// Filter function declarations based on enabled tools
+		const enabledFunctionDeclarations = geminiConfig.functionDeclarations.filter(func => {
+			return config.tools && config.tools[func.name] === true;
+		});
 
 		// Convert messages to Gemini chat history format
 		const geminiHistory = req.body.messages.map(message => ({
@@ -144,11 +163,11 @@ app.post("/api/stream", async (req, res) => {
 		}));
 
 		let response = await ai.models.generateContentStream({
-			model: geminiConfig.model,
+			model: config.model,
 			contents: geminiHistory,
 			config: {
 				systemInstruction: geminiConfig.systemInstruction,
-				tools: [{ functionDeclarations: geminiConfig.functionDeclarations }],
+				tools: enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined,
 			},
 		});
 		
@@ -194,11 +213,11 @@ app.post("/api/stream", async (req, res) => {
 				});
 
 				response = await ai.models.generateContentStream({
-					model: geminiConfig.model,
+					model: config.model,
 					contents: geminiHistory,
 					config: {
 						systemInstruction: geminiConfig.systemInstruction,
-						tools: [{ functionDeclarations: geminiConfig.functionDeclarations }],
+						tools: enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined,
 					},
 				});
 			}

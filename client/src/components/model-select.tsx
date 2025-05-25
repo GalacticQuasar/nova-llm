@@ -1,4 +1,4 @@
-import * as React from "react"
+import { useConfig } from "@/contexts/config-context"
 
 import {
   Select,
@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/select"
 
 export function ModelSelect() {
+  const { config, updateModel } = useConfig()
+
   return (
-    <Select>
+    <Select value={config.model} onValueChange={updateModel}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a model" />
       </SelectTrigger>

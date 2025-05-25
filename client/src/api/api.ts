@@ -1,5 +1,6 @@
 import axios from "axios";
-import type { Message } from "../types/types";
+import type { Message } from "@/types/types";
+import type { ConfigState } from "@/contexts/config-context";
 
 export const api = axios.create({
 	baseURL: `${import.meta.env.VITE_SERVER_URL}/api`,
@@ -13,9 +14,9 @@ export const getTest = async () => {
     return response.data;
 };
 
-export const postChat = async (messages: Message[]) => {
+export const postChat = async (messages: Message[], config?: ConfigState) => {
     try {
-        const response = await api.post("/chat", { messages });
+        const response = await api.post("/chat", { messages, config });
         return response.data;
     } catch (error) {
         console.error("Error posting chat:", error);
@@ -23,14 +24,14 @@ export const postChat = async (messages: Message[]) => {
     }
 };
 
-export const postStream = async (messages: Message[]) => {
+export const postStream = async (messages: Message[], config?: ConfigState) => {
     try {
         const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/stream`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ messages }),
+            body: JSON.stringify({ messages, config }),
         });
         // Check for HTTP errors
         if (!response.ok) {
