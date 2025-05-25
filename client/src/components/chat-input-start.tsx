@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { LLMTextarea } from "@/components/llm-textarea"
-import { Send } from "lucide-react"
+import { Send, Settings } from "lucide-react"
 import type { ChatInputProps } from "@/types/types"
+import { ConfigDialog } from "@/components/config-dialog"
 
 export function ChatInputStart({ prompt, setPrompt, onSend }: ChatInputProps) {
   return (
@@ -27,10 +28,11 @@ export function ChatInputStart({ prompt, setPrompt, onSend }: ChatInputProps) {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
-      <div className="mt-2 flex justify-end">
+      <div className="mt-2 flex justify-between">
+        <ConfigDialog />
         <Button
           size="icon" 
-          className={`cursor-pointer border-1 rounded-lg ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-transparent pointer-events-none'}`}
+          className={`cursor-pointer border-1 rounded-lg transition-colors duration-300 ${prompt.length > 0 ? 'text-white bg-teal-500 hover:bg-teal-600' : 'text-muted-foreground bg-input/20 pointer-events-none'}`}
           onClick={onSend}
         >
           <Send className="scale-125" />

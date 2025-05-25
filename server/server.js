@@ -16,6 +16,12 @@ const getTime = async (location) => {
 	return time;
 };
 
+const getRandomNumber = async (min, max) => {
+	const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+	console.log("Random number: ", randomNumber);
+	return randomNumber;
+};
+
 const geminiConfig = {
 	model: "gemini-2.0-flash",
 	systemInstruction: "You are Nova, a knowldegeable and professional assistant.",
@@ -27,7 +33,23 @@ const geminiConfig = {
 			properties: {
 				location: {
 					type: Type.STRING,
-					description: "The time zone to get the time for",
+					description: "The time zone (IANA timezone identifier) to get the time for",
+				},
+			},
+		},
+	}, {
+		name: "get_random_number",
+		description: "Get a random number",
+		parameters: {
+			type: Type.OBJECT,
+			properties: {
+				min: {
+					type: Type.NUMBER,
+					description: "The minimum number to generate",
+				},
+				max: {
+					type: Type.NUMBER,
+					description: "The maximum number to generate",
 				},
 			},
 		},
@@ -36,7 +58,10 @@ const geminiConfig = {
 
 async function handleFunctionCall(functionCall) {
 	if (functionCall.name === "get_time") {
-		return await getTime(functionCall.parameters);
+		return await getTime(functionCall.args.location);
+	}
+	if (functionCall.name === "get_random_number") {
+		return await getRandomNumber(functionCall.args.min, functionCall.args.max);
 	}
 	return null;
 }
