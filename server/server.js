@@ -22,7 +22,8 @@ const getRandomNumber = async (min, max) => {
 };
 
 const geminiConfig = {
-	model: "gemini-2.0-flash",
+	defaultModel: "gemini-2.0-flash",
+	validModels: ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash-preview-05-20"],
 	systemInstruction: "You are Nova, a knowldegeable and professional assistant.",
 	functionDeclarations: [{
 		name: "get_time",
@@ -111,7 +112,13 @@ app.post("/api/chat", async (req, res) => {
 	}
 
 	// Use config from request or fallback to default
-	const config = req.body.config || { model: geminiConfig.model, tools: { get_time: true, get_random_number: true } };
+	const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true } };
+	
+	// Validate model and fallback to default if invalid
+	if (!config.model || !geminiConfig.validModels.includes(config.model)) {
+		console.log(`Invalid model "${config.model}", falling back to default: ${geminiConfig.defaultModel}`);
+		config.model = geminiConfig.defaultModel;
+	}
 	
 	console.log(`Using model: ${config.model}`);
 	console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
@@ -146,7 +153,13 @@ app.post("/api/stream", async (req, res) => {
 		}
 
 		// Use config from request or fallback to default
-		const config = req.body.config || { model: geminiConfig.model, tools: { get_time: true, get_random_number: true } };
+		const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true } };
+		
+		// Validate model and fallback to default if invalid
+		if (!config.model || !geminiConfig.validModels.includes(config.model)) {
+			console.log(`Invalid model "${config.model}", falling back to default: ${geminiConfig.defaultModel}`);
+			config.model = geminiConfig.defaultModel;
+		}
 		
 		console.log(`Using model: ${config.model}`);
 		console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
