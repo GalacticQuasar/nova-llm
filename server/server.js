@@ -12,13 +12,12 @@ const port = process.env.PORT || 3000;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const getTime = async (location) => {
-	const time = new Date().toLocaleTimeString("en-US", { timeZone: location });
+	const time = new Date().toLocaleTimeString("en-US", { timeZone: location, hour: "2-digit", minute: "2-digit" });
 	return time;
 };
 
 const getRandomNumber = async (min, max) => {
 	const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-	console.log("Random number: ", randomNumber);
 	return randomNumber;
 };
 
