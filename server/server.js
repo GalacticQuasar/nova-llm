@@ -91,55 +91,6 @@ app.get("/api/test", (req, res) => {
 	res.json({ message: "Yeehaw" });
 });
 
-// Regular chat with history endpoint
-app.post("/api/chat", async (req, res) => {
-	const testing = false; // Remove this for production
-
-	console.log("Received messages: ", req.body.messages);
-	console.log("Received config: ", req.body.config);
-
-	if (req.body.messages.length === 0) {
-		res.status(400).json({ error: "No messages received" });
-		return;
-	}
-
-	if (testing) {
-		// Take 1 second to simulate realistic response time
-		setTimeout(() => {
-			res.json({ llmResponse: fs.readFileSync("testing-response.txt", "utf8") });
-		}, 1000);
-		return;
-	}
-
-	// Use config from request or fallback to default
-	const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true } };
-	
-	// Validate model and fallback to default if invalid
-	if (!config.model || !geminiConfig.validModels.includes(config.model)) {
-		console.log(`Invalid model "${config.model}", falling back to default: ${geminiConfig.defaultModel}`);
-		config.model = geminiConfig.defaultModel;
-	}
-	
-	console.log(`Using model: ${config.model}`);
-	console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
-
-	// Convert messages to Gemini chat history format
-	const geminiHistory = req.body.messages.map(message => ({
-		role: message.role,
-		parts: [{ text: message.content }],
-	}));
-
-	const response = await ai.models.generateContent({
-		model: config.model,
-		contents: geminiHistory,
-		config: {
-			systemInstruction: geminiConfig.systemInstruction,
-		},
-	});
-
-	console.log("Generated response: ", response.text);
-	res.json({ llmResponse: response.text });
-});
 
 // Streaming endpoint
 app.post("/api/stream", async (req, res) => {

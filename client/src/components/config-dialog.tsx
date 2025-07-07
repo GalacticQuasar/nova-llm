@@ -10,6 +10,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ModelSelect } from "@/components/model-select"
+import { StreamSelect } from "@/components/stream-select"
 import { Separator } from "@/components/ui/separator"
 import { Settings } from "lucide-react"
 import { useConfig } from "@/contexts/config-context"
@@ -70,6 +71,13 @@ export function ConfigDialog() {
                                 {config.tools.get_random_number ? 'Enabled' : 'Disabled'}
                             </span>
                         </Label>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="model" className="text-right">
+                            Stream Animation
+                        </Label>
+                        <StreamSelect />
                     </div>
                 </div>
             </DialogContent>

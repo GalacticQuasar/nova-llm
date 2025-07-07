@@ -6,12 +6,14 @@ export interface ConfigState {
     get_time: boolean
     get_random_number: boolean
   }
+  streamType: string
 }
 
 interface ConfigContextType {
   config: ConfigState
   updateModel: (model: string) => void
   updateTool: (toolName: keyof ConfigState['tools'], enabled: boolean) => void
+  updateStreamType: (streamType: string) => void
   saveConfig: () => void
 }
 
@@ -20,7 +22,8 @@ const defaultConfig: ConfigState = {
   tools: {
     get_time: true,
     get_random_number: true
-  }
+  },
+  streamType: "Chunk"
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
@@ -46,6 +49,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     }))
   }
 
+  const updateStreamType = (streamType: string) => {
+    setConfig(prev => ({ ...prev, streamType }))
+  }
+
   const saveConfig = () => {
     localStorage.setItem('nova-config', JSON.stringify(config))
   }
@@ -59,6 +66,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     config,
     updateModel,
     updateTool,
+    updateStreamType,
     saveConfig
   }
 

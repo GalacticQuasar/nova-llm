@@ -153,7 +153,10 @@ function ChatInterface() {
       const stream = await postStream(updatedMessages, config);
       if (!stream) throw new Error('No stream received');
 
-      const fullResponse = await streamByWord(stream);
+      // Choose stream animation type based on config in localstorage
+      const streamType = config.streamType ? config.streamType : 'Chunk';
+
+      const fullResponse = await streamFunctionSelector(streamType)(stream);
 
       // Once streaming is complete, add the full response to messages
       console.log('Full response:', fullResponse);
@@ -171,6 +174,19 @@ function ChatInterface() {
   const handleStop = () => {
     console.log('Aborting...')
     abortController.current.aborted = true;
+  }
+
+  const streamFunctionSelector = (streamType: string) => {
+    switch (streamType) {
+      case 'Chunk':
+        return streamByChunk;
+      case 'Word':
+        return streamByWord;
+      case 'Character':
+        return streamByCharacter;
+      default:
+        return streamByChunk;
+    }
   }
 
   const streamByChunk = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
