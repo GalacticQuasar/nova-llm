@@ -8,7 +8,7 @@ interface props {
 
 const MarkdownRenderer = ({ markdown }: props) => {
     return (
-        <article className="prose dark:prose-invert prose-img:rounded-lg max-w-none">
+        <article className="prose dark:prose-invert prose-img:rounded-lg max-w-none prose-p:text-neutral-300 prose-p:my-2 prose-ul:my-0 prose-li:my-0">
             <Markdown
                 components={{
                     code: ({ className, children, ...props }) => {
