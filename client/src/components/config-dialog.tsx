@@ -16,7 +16,7 @@ import { Settings } from "lucide-react"
 import { useConfig } from "@/contexts/config-context"
 
 export function ConfigDialog() {
-    const { config, updateTool } = useConfig()
+    const { config, updateTool, updateMcpEnabled } = useConfig()
 
     return (
         <Dialog>
@@ -43,19 +43,34 @@ export function ConfigDialog() {
                         <ModelSelect />
                     </div>
                     <Separator />
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Switch 
+                            id="mcpEnabled" 
+                            checked={config.mcpEnabled}
+                            onCheckedChange={(checked) => updateMcpEnabled(checked)}
+                        />
+                        <Label htmlFor="mcpEnabled" className="text-right flex items-center gap-2">
+                            MCP Mode
+                            <span className={`text-xs px-2 py-1 rounded ${config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {config.mcpEnabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                        </Label>
+                    </div>
+                    <Separator />
                     <Label className="text-right">
-                        Tools
+                        Tools {config.mcpEnabled ? '(Disabled due to MCP Mode)' : '(Custom Tools)'}
                     </Label>
                     <div className="grid grid-cols-2 items-center gap-4">
                         <Switch 
                             id="get_time" 
                             checked={config.tools.get_time}
+                            disabled={config.mcpEnabled}
                             onCheckedChange={(checked) => updateTool('get_time', checked)}
                         />
-                        <Label htmlFor="get_time" className="text-right flex items-center gap-2">
+                        <Label htmlFor="get_time" className={`text-right ml-auto flex items-center gap-2 ${config.mcpEnabled ? 'opacity-50' : ''}`}>
                             Get Time
-                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_time ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.tools.get_time ? 'Enabled' : 'Disabled'}
+                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_time && !config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {config.mcpEnabled ? 'Disabled' : (config.tools.get_time ? 'Enabled' : 'Disabled')}
                             </span>
                         </Label>
                     </div>
@@ -63,12 +78,13 @@ export function ConfigDialog() {
                         <Switch 
                             id="get_random_number" 
                             checked={config.tools.get_random_number}
+                            disabled={config.mcpEnabled}
                             onCheckedChange={(checked) => updateTool('get_random_number', checked)}
                         />
-                        <Label htmlFor="get_random_number" className="text-right flex items-center gap-2">
+                        <Label htmlFor="get_random_number" className={`text-right ml-auto flex items-center gap-2 ${config.mcpEnabled ? 'opacity-50' : ''}`}>
                             Get Random Number
-                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_random_number ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.tools.get_random_number ? 'Enabled' : 'Disabled'}
+                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_random_number && !config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {config.mcpEnabled ? 'Disabled' : (config.tools.get_random_number ? 'Enabled' : 'Disabled')}
                             </span>
                         </Label>
                     </div>

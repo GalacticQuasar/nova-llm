@@ -7,6 +7,7 @@ export interface ConfigState {
     get_random_number: boolean
   }
   streamType: string
+  mcpEnabled: boolean
 }
 
 interface ConfigContextType {
@@ -14,6 +15,7 @@ interface ConfigContextType {
   updateModel: (model: string) => void
   updateTool: (toolName: keyof ConfigState['tools'], enabled: boolean) => void
   updateStreamType: (streamType: string) => void
+  updateMcpEnabled: (enabled: boolean) => void
   saveConfig: () => void
 }
 
@@ -23,7 +25,8 @@ const defaultConfig: ConfigState = {
     get_time: true,
     get_random_number: true
   },
-  streamType: "Chunk"
+  streamType: "Chunk",
+  mcpEnabled: false
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
@@ -53,6 +56,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     setConfig(prev => ({ ...prev, streamType }))
   }
 
+  const updateMcpEnabled = (enabled: boolean) => {
+    setConfig(prev => ({ ...prev, mcpEnabled: enabled }))
+  }
+
   const saveConfig = () => {
     localStorage.setItem('nova-config', JSON.stringify(config))
   }
@@ -67,6 +74,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     updateModel,
     updateTool,
     updateStreamType,
+    updateMcpEnabled,
     saveConfig
   }
 

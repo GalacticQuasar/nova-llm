@@ -2,6 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "watch": "nodemon server.js",
@@ -11,9 +12,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@google/genai": "^0.14.1",
+    "@google/genai": "^1.14.0",
+    "@modelcontextprotocol/sdk": "^1.17.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "mcp-hello-world": "^1.1.2"
   }
 }

@@ -1,15 +1,34 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const { GoogleGenAI, Type } = require("@google/genai");
-const fs = require("fs");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { GoogleGenAI, Type, mcpToTool } from "@google/genai";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
+// Pull environment variables
 dotenv.config();
 
-const app = express();
-const port = process.env.PORT || 3000;
+// Set up AI stuff
+
+// Create server parameters for stdio connection
+const serverParams = new StdioClientTransport({
+	command: "npx", // Executable
+//   args: ["-y", "@philschmid/weather-mcp"] // MCP Server
+	args: ["mcp-hello-world"]
+});
+
+const client = new Client(
+	{
+		name: "example-client",
+		version: "1.0.0"
+	}
+);
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Initialize the connection between client and server
+await client.connect(serverParams);
+console.log("CONNECTED TO MCP SERVER")
 
 const getTime = async (location) => {
 	const time = new Date().toLocaleTimeString("en-US", { timeZone: location, hour: "2-digit", minute: "2-digit" });
@@ -24,7 +43,7 @@ const getRandomNumber = async (min, max) => {
 const geminiConfig = {
 	defaultModel: "gemini-2.0-flash",
 	validModels: ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash-preview-05-20"],
-	systemInstruction: "You are Nova, a knowldegeable and professional assistant.",
+	systemInstruction: "You are Nova, a knowledgeable and professional assistant.",
 	functionDeclarations: [{
 		name: "get_time",
 		description: "Get the current time",
@@ -57,14 +76,22 @@ const geminiConfig = {
 };
 
 async function handleFunctionCall(functionCall) {
-	if (functionCall.name === "get_time") {
-		return await getTime(functionCall.args.location);
+	try {
+		if (functionCall.name === "get_time") {
+			return await getTime(functionCall.args.location);
+		}
+		if (functionCall.name === "get_random_number") {
+			return await getRandomNumber(functionCall.args.min, functionCall.args.max);
+		}
+	} catch (error) {
+		console.error(`Error handling function call ${functionCall.name}:`, error);
+		return null;
 	}
-	if (functionCall.name === "get_random_number") {
-		return await getRandomNumber(functionCall.args.min, functionCall.args.max);
-	}
-	return null;
 }
+
+// Set up express server
+const app = express();
+const port = process.env.PORT || 3000;
 
 /* MIDDLEWARE */
 
@@ -104,8 +131,10 @@ app.post("/api/stream", async (req, res) => {
 		}
 
 		// Use config from request or fallback to default
-		const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true } };
+		const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true }, mcpEnabled: false };
 		
+
+
 		// Validate model and fallback to default if invalid
 		if (!config.model || !geminiConfig.validModels.includes(config.model)) {
 			console.log(`Invalid model "${config.model}", falling back to default: ${geminiConfig.defaultModel}`);
@@ -113,12 +142,22 @@ app.post("/api/stream", async (req, res) => {
 		}
 		
 		console.log(`Using model: ${config.model}`);
-		console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
 
-		// Filter function declarations based on enabled tools
-		const enabledFunctionDeclarations = geminiConfig.functionDeclarations.filter(func => {
-			return config.tools && config.tools[func.name] === true;
-		});
+		// Check if MCP is enabled, otherwise use custom tools
+		let tools;
+		if (config.mcpEnabled === true) {
+			console.log("MCP ENABLED, not using custom tools.")
+			tools = [mcpToTool(client)]
+		} else {
+			console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
+
+			// Filter function declarations based on enabled tools
+			let enabledFunctionDeclarations = geminiConfig.functionDeclarations.filter(func => {
+				return config.tools && config.tools[func.name] === true;
+			});
+			console.log("ENABLED FUNCTION DECLARATIONS:", enabledFunctionDeclarations)
+			tools = enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined;
+		}
 
 		// Convert messages to Gemini chat history format
 		const geminiHistory = req.body.messages.map(message => ({
@@ -131,7 +170,7 @@ app.post("/api/stream", async (req, res) => {
 			contents: geminiHistory,
 			config: {
 				systemInstruction: geminiConfig.systemInstruction,
-				tools: enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined,
+				tools: tools,
 			},
 		});
 		
@@ -146,17 +185,21 @@ app.post("/api/stream", async (req, res) => {
 			console.log("Streaming response:");
 			for await (const chunk of response) {
 				if (chunk.functionCalls) {
-					console.log("Function call: ", chunk.functionCalls[0]);
-					functionCall = chunk.functionCalls[0];
-					break;
+					console.log("Function call:", chunk.functionCalls[0]);
+					if (!config.mcpEnabled) {  // Only handle it manually if MCP mode is off (custom tools)
+						functionCall = chunk.functionCalls[0];
+					}
+					continue;
 				}
 
-				process.stdout.write(chunk.text);
-				res.write(chunk.text);
+				if (chunk.text) {
+					process.stdout.write(chunk.text);
+					res.write(chunk.text);
+				}
 			}
 
 			if (functionCall) {
-				console.log("Handling function call: ", functionCall);
+				console.log("Handling function call:", functionCall);
 				let result = await handleFunctionCall(functionCall);
 				console.log(`Function execution result: ${JSON.stringify(result)}`);
 
@@ -181,13 +224,13 @@ app.post("/api/stream", async (req, res) => {
 					contents: geminiHistory,
 					config: {
 						systemInstruction: geminiConfig.systemInstruction,
-						tools: enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined,
+						tools: tools,
 					},
 				});
 			}
 		} while (functionCall)
 
-		console.log("Streaming response complete");
+		console.log("\nStreaming response complete");
 
 		res.end();
 	} catch (error) {
