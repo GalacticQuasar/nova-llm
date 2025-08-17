@@ -20,23 +20,23 @@ import { Button } from "@/components/ui/button"
 const items = [
   {
     title: "How to cut a watermelon?",
-    url: "#",
+    url: "",
   },
   {
     title: "What color are bananas?",
-    url: "#",
+    url: "",
   },
   {
-    title: "Explain the theory of relativity",
-    url: "#",
+    title: "Explain the theory of relativity.",
+    url: "",
   },
   {
-    title: "How to make a cake?",
-    url: "#",
+    title: "How to bake a cake?",
+    url: "",
   },
   {
     title: "How to make a sandwich?",
-    url: "#",
+    url: "",
   },
 ]
 

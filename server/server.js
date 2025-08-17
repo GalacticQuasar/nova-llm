@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 import { GoogleGenAI, Type, mcpToTool } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -112,6 +113,22 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting for /api/stream endpoint - 5 requests per second globally
+const streamRateLimit = rateLimit({
+	windowMs: 1000, // 1 second window
+	max: 5, // Limit each IP to 5 requests per windowMs
+	message: {
+		error: "Too many requests to the stream endpoint. Please try again later.",
+		retryAfter: 1
+	},
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+	// Global rate limiting (applies to all IPs collectively)
+	keyGenerator: () => 'global-stream-limit',
+	skipSuccessfulRequests: false,
+	skipFailedRequests: false,
+});
+
 /* ROUTES */
 
 app.get("/api/test", (req, res) => {
@@ -120,7 +137,7 @@ app.get("/api/test", (req, res) => {
 
 
 // Streaming endpoint
-app.post("/api/stream", async (req, res) => {
+app.post("/api/stream", streamRateLimit, async (req, res) => {
 	try {
 		console.log("Received messages: ", req.body.messages);
 		console.log("Received config: ", req.body.config);

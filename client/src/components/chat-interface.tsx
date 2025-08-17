@@ -165,7 +165,11 @@ function ChatInterface() {
     } catch (error) {
       setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
       console.error('Streaming error:', error);
-      toast.error('Error streaming response. Please try again.')
+      if (error instanceof Error && error.message.includes('429')) {
+        toast.error('Server is busy. Please try again later.');
+      } else {
+        toast.error('Error streaming response. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
