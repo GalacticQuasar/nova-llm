@@ -22,8 +22,8 @@ interface ConfigContextType {
 const defaultConfig: ConfigState = {
   model: "gemini-2.0-flash",
   tools: {
-    get_time: true,
-    get_random_number: true
+    get_time: false,
+    get_random_number: false
   },
   streamType: "Chunk",
   mcpEnabled: false
