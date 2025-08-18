@@ -131,6 +131,10 @@ const streamRateLimit = rateLimit({
 
 /* ROUTES */
 
+app.get("/", (req, res) => {
+	res.send("Hello World!");
+});
+
 app.get("/api/test", (req, res) => {
 	res.json({ message: "Yeehaw" });
 });
