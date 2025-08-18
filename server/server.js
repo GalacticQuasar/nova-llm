@@ -15,7 +15,7 @@ dotenv.config();
 const serverParams = new StdioClientTransport({
 	command: "npx", // Executable
 //   args: ["-y", "@philschmid/weather-mcp"] // MCP Server
-	args: ["mcp-hello-world"]
+	args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 });
 
 const client = new Client(
