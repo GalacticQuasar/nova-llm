@@ -197,8 +197,9 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		let functionCall;
+		let functionCalls;
 		do {
+			console.log("Generating response...")
 			const response = await ai.models.generateContentStream({
 				model: config.model,
 				contents: geminiHistory,
@@ -208,13 +209,17 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 				},
 			});
 
-			functionCall = null;
+			functionCalls = null;
 			process.stdout.write("\nStreaming response: ");
 			for await (const chunk of response) {
 				if (chunk.functionCalls) {
-					console.log("\n---\tFunction call:", chunk.functionCalls[0]);
+					console.log("\n---\tFunction calls:", chunk.functionCalls);
 					if (!config.mcpEnabled) {  // Only handle it manually if MCP mode is off (custom tools)
-						functionCall = chunk.functionCalls[0];
+						if (functionCalls) {
+							// add to list
+							functionCalls.push(...chunk.functionCalls);
+						}
+						functionCalls = chunk.functionCalls;
 					}
 					continue;
 				}
@@ -225,28 +230,30 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 				}
 			}
 
-			if (functionCall) {
-				console.log("---\tHandling function call:", functionCall);
-				let result = await handleFunctionCall(functionCall);
-				console.log(`---\tFunction execution result: ${JSON.stringify(result)}`);
+			if (functionCalls && functionCalls.length > 0) {
+				for (const functionCall of functionCalls) {
+					console.log("---\tHandling function call:", functionCall);
+					let result = await handleFunctionCall(functionCall);
+					console.log(`---\tFunction execution result: ${JSON.stringify(result)}\n`);
 
-				const functionResponse = {
-					name: functionCall.name,
-					response: { result },
-				};
+					const functionResponse = {
+						name: functionCall.name,
+						response: { result },
+					};
 
-				// Append function call and result to geminiHistory
-				geminiHistory.push({
-					role: "model",
-					parts: [{ functionCall: functionCall }],
-				});
+					// Append function call and result to geminiHistory
+					geminiHistory.push({
+						role: "model",
+						parts: [{ functionCall: functionCall }],
+					});
 
-				geminiHistory.push({
-					role: "user",
-					parts: [{ functionResponse: functionResponse }],
-				});
+					geminiHistory.push({
+						role: "user",
+						parts: [{ functionResponse: functionResponse }],
+					});
+				}
 			}
-		} while (functionCall)
+		} while (functionCalls && functionCalls.length > 0);
 
 		console.log("\n---------- DONE ----------");
 
