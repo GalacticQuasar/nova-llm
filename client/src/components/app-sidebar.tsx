@@ -67,7 +67,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem className="mt-2">
                 <SidebarMenuButton className="text-teal-300" asChild>
-                  <a href="/new">
+                  <a href="/">
                     <CirclePlus className="scale-140" />
                     <span className="ml-2 font-mono">New Chat</span>
                   </a>
