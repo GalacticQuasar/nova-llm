@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { LLMTextarea } from "@/components/llm-textarea"
-import { Send, Settings } from "lucide-react"
+import { Send } from "lucide-react"
 import type { ChatInputProps } from "@/types/types"
 import { CircleStop } from "lucide-react"
 import { ConfigDialog } from "@/components/config-dialog"

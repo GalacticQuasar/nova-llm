@@ -8,13 +8,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-  SidebarHeader,
+//  SidebarHeader,
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/sidebar"
 import { NavUser } from "./nav-user"
 import { CirclePlus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+//import { Button } from "@/components/ui/button"
 
 // Menu items
 const items = [

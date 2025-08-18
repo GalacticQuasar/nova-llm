@@ -121,7 +121,7 @@ function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
+  //const [isError, setIsError] = useState(false)
   const [streamingResponse, setStreamingResponse] = useState("")
   const abortController = useRef<{ aborted: boolean }>({ aborted: false });
 
@@ -163,7 +163,7 @@ function ChatInterface() {
       setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
       setStreamingResponse('');
     } catch (error) {
-      setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
+      //setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
       console.error('Streaming error:', error);
       if (error instanceof Error && error.message.includes('429')) {
         toast.error('Server is busy. Please try again later.');
