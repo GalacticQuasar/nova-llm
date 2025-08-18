@@ -101,13 +101,11 @@ const port = process.env.PORT || 3000;
 
 /* MIDDLEWARE */
 
-// Enable CORS for specific origin in production, all origins in development
+// CORS Configuration
 app.use(
 	cors({
-		origin:
-			process.env.NODE_ENV === "production"
-				? "https://your-production-domain.com" // Replace with your actual production domain
-				: "http://localhost:5173", // Vite's default development server
+		origin: process.env.CLIENT_ORIGIN,
+		methods: ["GET", "POST", "OPTIONS"],
 	})
 );
 
