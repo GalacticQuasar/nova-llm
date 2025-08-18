@@ -5,6 +5,12 @@ import rateLimit from "express-rate-limit";
 import { GoogleGenAI, Type, mcpToTool } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Configure __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Pull environment variables
 dotenv.config();
@@ -14,8 +20,7 @@ dotenv.config();
 // Create server parameters for stdio connection
 const serverParams = new StdioClientTransport({
 	command: "npx", // Executable
-//   args: ["-y", "@philschmid/weather-mcp"] // MCP Server
-	args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+	args: ["--cache", "/tmp/.npm", "-y", "@modelcontextprotocol/server-sequential-thinking"]
 });
 
 const client = new Client(
