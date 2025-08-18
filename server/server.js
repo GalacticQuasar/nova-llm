@@ -132,6 +132,11 @@ const streamRateLimit = rateLimit({
 	skipFailedRequests: false,
 });
 
+// Check if function calls are valid functions
+const isValidFunctionCall = (functionCall) => {
+	return geminiConfig.functionDeclarations.some(func => func.name === functionCall.name);
+};
+
 /* ROUTES */
 
 app.get("/", (req, res) => {
@@ -146,8 +151,10 @@ app.get("/api/test", (req, res) => {
 // Streaming endpoint
 app.post("/api/stream", streamRateLimit, async (req, res) => {
 	try {
-		console.log("Received messages: ", req.body.messages);
-		console.log("Received config: ", req.body.config);
+		console.log("\n---------- /api/stream ----------\n")
+		// Debugging logs
+		// console.log("Received messages: ", req.body.messages);
+		// console.log("Received config: ", req.body.config);
 
 		if (req.body.messages.length === 0) {
 			res.status(400).json({ error: "No messages received" });
@@ -164,8 +171,6 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 			console.log(`Invalid model "${config.model}", falling back to default: ${geminiConfig.defaultModel}`);
 			config.model = geminiConfig.defaultModel;
 		}
-		
-		console.log(`Using model: ${config.model}`);
 
 		// Check if MCP is enabled, otherwise use custom tools
 		let tools;
@@ -173,13 +178,11 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 			console.log("MCP ENABLED, not using custom tools.")
 			tools = [mcpToTool(client)]
 		} else {
-			console.log(`Enabled tools: ${Object.entries(config.tools).filter(([_, enabled]) => enabled).map(([name, _]) => name).join(', ') || 'none'}`);
-
 			// Filter function declarations based on enabled tools
 			let enabledFunctionDeclarations = geminiConfig.functionDeclarations.filter(func => {
 				return config.tools && config.tools[func.name] === true;
 			});
-			console.log("ENABLED FUNCTION DECLARATIONS:", enabledFunctionDeclarations)
+			console.log("Enabled Tools:", enabledFunctionDeclarations.map(func => func.name));
 			tools = enabledFunctionDeclarations.length > 0 ? [{ functionDeclarations: enabledFunctionDeclarations }] : undefined;
 		}
 
@@ -188,15 +191,6 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 			role: message.role,
 			parts: [{ text: message.content }],
 		}));
-
-		let response = await ai.models.generateContentStream({
-			model: config.model,
-			contents: geminiHistory,
-			config: {
-				systemInstruction: geminiConfig.systemInstruction,
-				tools: tools,
-			},
-		});
 		
 		res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 		res.setHeader('Transfer-Encoding', 'chunked');
@@ -205,11 +199,20 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 
 		let functionCall;
 		do {
+			const response = await ai.models.generateContentStream({
+				model: config.model,
+				contents: geminiHistory,
+				config: {
+					systemInstruction: geminiConfig.systemInstruction,
+					tools: tools,
+				},
+			});
+
 			functionCall = null;
-			console.log("Streaming response:");
+			process.stdout.write("\nStreaming response: ");
 			for await (const chunk of response) {
 				if (chunk.functionCalls) {
-					console.log("Function call:", chunk.functionCalls[0]);
+					console.log("\n---\tFunction call:", chunk.functionCalls[0]);
 					if (!config.mcpEnabled) {  // Only handle it manually if MCP mode is off (custom tools)
 						functionCall = chunk.functionCalls[0];
 					}
@@ -223,9 +226,9 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 			}
 
 			if (functionCall) {
-				console.log("Handling function call:", functionCall);
+				console.log("---\tHandling function call:", functionCall);
 				let result = await handleFunctionCall(functionCall);
-				console.log(`Function execution result: ${JSON.stringify(result)}`);
+				console.log(`---\tFunction execution result: ${JSON.stringify(result)}`);
 
 				const functionResponse = {
 					name: functionCall.name,
@@ -242,19 +245,10 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 					role: "user",
 					parts: [{ functionResponse: functionResponse }],
 				});
-
-				response = await ai.models.generateContentStream({
-					model: config.model,
-					contents: geminiHistory,
-					config: {
-						systemInstruction: geminiConfig.systemInstruction,
-						tools: tools,
-					},
-				});
 			}
 		} while (functionCall)
 
-		console.log("\nStreaming response complete");
+		console.log("\n---------- DONE ----------");
 
 		res.end();
 	} catch (error) {
