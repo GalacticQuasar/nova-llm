@@ -18,7 +18,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS with custom design system
-- **UI Components**: Radix UI primitives with custom styling
+- **UI Components**: Shadcn/ui components with custom styling
 - **State Management**: React Context for configuration
 - **Markdown Rendering**: Full markdown support with syntax highlighting
 
