@@ -132,11 +132,6 @@ const streamRateLimit = rateLimit({
 	skipFailedRequests: false,
 });
 
-// Check if function calls are valid functions
-const isValidFunctionCall = (functionCall) => {
-	return geminiConfig.functionDeclarations.some(func => func.name === functionCall.name);
-};
-
 /* ROUTES */
 
 app.get("/", (req, res) => {

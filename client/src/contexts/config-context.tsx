@@ -25,7 +25,7 @@ const defaultConfig: ConfigState = {
     get_time: false,
     get_random_number: false
   },
-  streamType: "Chunk",
+  streamType: "Word",
   mcpEnabled: false
 }
 
