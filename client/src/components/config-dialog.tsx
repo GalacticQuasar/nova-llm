@@ -43,21 +43,7 @@ export function ConfigDialog() {
                         <ModelSelect />
                     </div>
                     <Separator />
-                    <div className="grid grid-cols-2 items-center gap-4">
-                        <Switch 
-                            id="mcpEnabled" 
-                            checked={config.mcpEnabled}
-                            onCheckedChange={(checked) => updateMcpEnabled(checked)}
-                        />
-                        <Label htmlFor="mcpEnabled" className="text-right flex items-center gap-2">
-                            MCP Mode
-                            <span className={`text-xs px-2 py-1 rounded ${config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.mcpEnabled ? 'Enabled' : 'Disabled'}
-                            </span>
-                        </Label>
-                    </div>
-                    <Separator />
-                    <Label className="text-right">
+                    <Label className={`text-right ${config.mcpEnabled ? 'text-red-400' : ''}`}>
                         Tools {config.mcpEnabled ? '(Disabled due to MCP Mode)' : '(Custom Tools)'}
                     </Label>
                     <div className="grid grid-cols-2 items-center gap-4">
@@ -85,6 +71,23 @@ export function ConfigDialog() {
                             Get Random Number
                             <span className={`text-xs px-2 py-1 rounded ${config.tools.get_random_number && !config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                 {config.mcpEnabled ? 'Disabled' : (config.tools.get_random_number ? 'Enabled' : 'Disabled')}
+                            </span>
+                        </Label>
+                    </div>
+                    <Separator />
+                    <Label className={`text-right`}>
+                        MCP (Model Context Protocol)
+                    </Label>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Switch 
+                            id="mcpEnabled" 
+                            checked={config.mcpEnabled}
+                            onCheckedChange={(checked) => updateMcpEnabled(checked)}
+                        />
+                        <Label htmlFor="mcpEnabled" className="text-right ml-auto flex items-center gap-2">
+                            Sequential Thinking
+                            <span className={`text-xs px-2 py-1 rounded ${config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {config.mcpEnabled ? 'Enabled' : 'Disabled'}
                             </span>
                         </Label>
                     </div>
