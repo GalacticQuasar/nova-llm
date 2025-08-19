@@ -49,7 +49,7 @@ const getRandomNumber = async (min, max) => {
 const geminiConfig = {
 	defaultModel: "gemini-2.0-flash",
 	validModels: ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash-preview-05-20"],
-	systemInstruction: "You are Nova, a knowledgeable and professional assistant.",
+	systemInstruction: "You are Nova, a knowledgeable and professional assistant. You are allowed to answer general questions that may not directly pertain to tools.", // Gemini otherwise refuses to answer general questions
 	functionDeclarations: [{
 		name: "get_time",
 		description: "Get the current time",
