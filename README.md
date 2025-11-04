@@ -4,7 +4,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 
 ## ✨ Features
 
-- **Multiple Gemini Models**: Support for Gemini 2.5 Flash, 2.0 Flash, and 1.5 Flash
+- **Multiple Gemini Models**: Support for Gemini 2.5 Pro, 2.5 Flash, and 2.0 Flash
 - **Model Context Protocol (MCP)**: Extensible tool system for enhanced AI capabilities
 - **Custom Function Tools**: Example time and random number generation functions
 - **Real-time Streaming**: Choose from chunk, word-by-word, or character-by-character streaming animations
@@ -82,9 +82,9 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 
 ### Model Selection
 Choose from available Gemini models:
+- **Gemini 2.5 Pro**
 - **Gemini 2.5 Flash**
 - **Gemini 2.0 Flash**
-- **Gemini 1.5 Flash**
 
 ### Streaming Animation
 Customize how responses appear:
@@ -198,7 +198,7 @@ Stream chat responses from Gemini models.
     }
   ],
   "config": {
-    "model": "gemini-2.0-flash",
+    "model": "gemini-2.5-flash",
     "tools": {
       "get_time": true,
       "get_random_number": false

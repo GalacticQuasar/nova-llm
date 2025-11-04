@@ -20,7 +20,7 @@ interface ConfigContextType {
 }
 
 const defaultConfig: ConfigState = {
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
   tools: {
     get_time: false,
     get_random_number: false
