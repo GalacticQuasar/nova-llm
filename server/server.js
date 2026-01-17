@@ -61,6 +61,7 @@ const geminiConfig = {
 					description: "The time zone (IANA timezone identifier) to get the time for",
 				},
 			},
+			required: ["location"],
 		},
 	}, {
 		name: "get_random_number",
@@ -77,6 +78,7 @@ const geminiConfig = {
 					description: "The maximum number to generate",
 				},
 			},
+			required: ["min", "max"],
 		},
 	}],
 };
@@ -255,6 +257,10 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 		res.end();
 	} catch (error) {
 		console.error('Streaming error:', error);
+		if (error.status === 429) {
+			res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
+			return;
+		}
     	res.status(500).send('Error streaming response.');
 	}
 });
