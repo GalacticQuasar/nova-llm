@@ -2,6 +2,8 @@
 
 A full-stack LLM agent workflow with custom tool calling capabilities and configuration with MCP servers.
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8a0a6b6c-ec05-4dec-af77-1682df1a8d7f" />
+
 ## Features
 
 - **Model Context Protocol (MCP)**: Extensible tool system for enhanced AI capabilities
