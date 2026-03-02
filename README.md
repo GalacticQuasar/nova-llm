@@ -2,7 +2,7 @@
 
 A full-stack LLM agent workflow with custom tool calling capabilities and configuration with MCP servers.
 
-## ✨ Features
+## Features
 
 - **Model Context Protocol (MCP)**: Extensible tool system for enhanced AI capabilities
 - **Custom Function Tools**: Example time and random number generation functions
@@ -11,7 +11,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Copy Messages**: One-click copying of any message to clipboard
 - **Configurable Settings**: Easy model switching and tool configuration for each message
 
-## 🏗️ Architecture
+## Architecture
 
 ### Frontend (Client)
 - **Framework**: React 19 with TypeScript
@@ -27,7 +27,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **MCP Support**: Model Context Protocol client for extensible tools
 - **Streaming**: Server-sent events for real-time responses
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -77,7 +77,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 
 3. **Open your browser** to `http://localhost:5173`
 
-## ⚙️ Configuration
+## Configuration
 
 ### Streaming Animation
 Customize how responses appear:
@@ -95,7 +95,7 @@ Enable/disable built-in functions:
 ### Model Context Protocol (MCP)
 Toggle MCP mode to use external tool servers for extended functionality.
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 
@@ -162,7 +162,7 @@ nova-llm/
     }
    ```
 
-## 🔌 Model Context Protocol (MCP)
+## Model Context Protocol (MCP)
 
 Nova LLM supports MCP for extensible tool integration. MCP servers can be configured in the server initialization:
 
@@ -175,7 +175,7 @@ const serverParams = new StdioClientTransport({
 
 When MCP mode is enabled, custom function tools are disabled in favor of MCP-provided tools.
 
-## 📚 API Reference
+## API Reference
 
 ### POST `/api/stream`
 
