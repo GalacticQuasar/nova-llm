@@ -2,14 +2,28 @@ import { useEffect, useState, useRef, useMemo, memo } from 'react'
 import { postStream } from '@/api/api'
 import { ChatInputStart } from "@/components/chat-input-start"
 import { ChatInput } from "@/components/chat-input"
-import type { Message } from "@/types/types"
+import type { Message, ToolCallInfo } from "@/types/types"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
 import { toast } from "sonner"
-import { Copy, Loader } from 'lucide-react'
+import { Copy, Loader, Wrench } from 'lucide-react'
 import { useConfig } from '@/contexts/config-context'
 
+function ToolCallBadge({ toolCall }: { toolCall: ToolCallInfo }) {
+  const argsStr = Object.entries(toolCall.args)
+    .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+    .join(', ')
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 my-1 rounded-sm bg-teal-900/40 border border-teal-700/50 text-teal-300 text-sm font-mono">
+      <Wrench size={12} />
+      <span className="font-semibold">{toolCall.name}</span>
+      {argsStr && <span className="text-teal-400/80">({argsStr})</span>}
+    </span>
+  )
+}
+
 // Memoized message component to prevent unnecessary re-renders
-const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boolean }) => {
+const ChatMessage = memo(({ message, isLast, streamingToolCalls }: { message: Message, isLast: boolean, streamingToolCalls?: ToolCallInfo[] }) => {
+  const toolCalls = message.toolCalls || streamingToolCalls || []
   return (
     <div
       className={`${message.role === 'user' ? '' : `${isLast ? 'min-h-[calc(100dvh-140px)]' : ''}`}`}
@@ -25,7 +39,16 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
           {message.role === 'user' ? (
           <p className="break-words whitespace-pre-wrap">{message.content}</p>
           ) : (
-          <MarkdownRenderer markdown={message.content} />
+          <>
+            {toolCalls.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {toolCalls.map((tc, i) => (
+                  <ToolCallBadge key={`tc-${i}`} toolCall={tc} />
+                ))}
+              </div>
+            )}
+            {message.content && <MarkdownRenderer markdown={message.content} />}
+          </>
           )}
         </div>
       </div>
@@ -44,7 +67,7 @@ const ChatMessage = memo(({ message, isLast }: { message: Message, isLast: boole
 })
 
 // Memoized message list component
-const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages: Message[], isLoading: boolean, streamingResponse: string }) => {
+const MessageList = memo(({ messages, isLoading, streamingResponse, streamingToolCalls }: { messages: Message[], isLoading: boolean, streamingResponse: string, streamingToolCalls: ToolCallInfo[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const loadingRef = useRef<HTMLDivElement>(null)
 
@@ -102,6 +125,7 @@ const MessageList = memo(({ messages, isLoading, streamingResponse }: { messages
           <ChatMessage 
             message={{ role: 'model', content: streamingResponse }}
             isLast={messages.length > 2}
+            streamingToolCalls={streamingToolCalls}
           />
         </div>
       )}
@@ -123,14 +147,16 @@ function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   //const [isError, setIsError] = useState(false)
   const [streamingResponse, setStreamingResponse] = useState("")
+  const [streamingToolCalls, setStreamingToolCalls] = useState<ToolCallInfo[]>([])
+  const collectedToolCalls = useRef<ToolCallInfo[]>([])
   const abortController = useRef<{ aborted: boolean }>({ aborted: false });
 
   const transitionDuration = 200
 
   // Memoize the message list to prevent unnecessary re-renders
   const messageList = useMemo(() => (
-    <MessageList messages={messages} isLoading={isLoading} streamingResponse={streamingResponse} />
-  ), [messages, isLoading, streamingResponse])
+    <MessageList messages={messages} isLoading={isLoading} streamingResponse={streamingResponse} streamingToolCalls={streamingToolCalls} />
+  ), [messages, isLoading, streamingResponse, streamingToolCalls])
 
   const handleSend = async () => {
     if (!prompt.trim() || isLoading) return;
@@ -149,6 +175,8 @@ function ChatInterface() {
     abortController.current.aborted = false;
 
     setIsLoading(true);
+    setStreamingToolCalls([]);
+    collectedToolCalls.current = [];
     try {
       const stream = await postStream(updatedMessages, config);
       if (!stream) throw new Error('No stream received');
@@ -158,9 +186,8 @@ function ChatInterface() {
 
       const fullResponse = await streamFunctionSelector(streamType)(stream);
 
-      // Once streaming is complete, add the full response to messages
-      console.log('Full response:', fullResponse);
-      setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse }]);
+      const toolCalls = collectedToolCalls.current;
+      setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse, toolCalls: toolCalls.length > 0 ? toolCalls : undefined }]);
       setStreamingResponse('');
     } catch (error) {
       //setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
@@ -172,6 +199,7 @@ function ChatInterface() {
       }
     } finally {
       setIsLoading(false)
+      setStreamingToolCalls([])
     }
   }
 
@@ -203,8 +231,20 @@ function ChatInterface() {
         const { done, value } = await reader.read();
         if (done || abortController.current.aborted) break;
         
-        const chunk = decoder.decode(value);
-        fullResponse += chunk;
+        let buffer = decoder.decode(value);
+        const toolCallRegex = /\n?__NOVA_TOOL_CALL__(.+?)__\n?/g;
+        let toolCallMatch;
+        while ((toolCallMatch = toolCallRegex.exec(buffer)) !== null) {
+          try {
+            const parsed = JSON.parse(toolCallMatch[1]);
+            const tc = { name: parsed.name, args: parsed.args };
+            setStreamingToolCalls(prev => [...prev, tc]);
+            collectedToolCalls.current.push(tc);
+          } catch { /* skip malformed tool call markers */ }
+        }
+        buffer = buffer.replace(/\n?__NOVA_TOOL_CALL__(.+?)__\n?/g, '');
+
+        fullResponse += buffer;
         setStreamingResponse(fullResponse);
       }
     } finally {
@@ -226,8 +266,19 @@ function ChatInterface() {
         if (done) break;
         if (abortController.current.aborted) break;
         
-        const chunk = decoder.decode(value);
-        buffer += chunk;
+        buffer += decoder.decode(value);
+
+        const toolCallRegex = /\n?__NOVA_TOOL_CALL__(.+?)__\n?/g;
+        let toolCallMatch;
+        while ((toolCallMatch = toolCallRegex.exec(buffer)) !== null) {
+          try {
+            const parsed = JSON.parse(toolCallMatch[1]);
+            const tc = { name: parsed.name, args: parsed.args };
+            setStreamingToolCalls(prev => [...prev, tc]);
+            collectedToolCalls.current.push(tc);
+          } catch { /* skip malformed tool call markers */ }
+        }
+        buffer = buffer.replace(/\n?__NOVA_TOOL_CALL__(.+?)__\n?/g, '');
 
         // Process complete words from the buffer, keeping original spacing
         const words = buffer.split(/(\s+)/);
@@ -277,8 +328,19 @@ function ChatInterface() {
         break;
       }
       
-      const chunk = decoder.decode(value);
-      buffer += chunk;
+      buffer += decoder.decode(value);
+
+      const toolCallRegex = /\n?__NOVA_TOOL_CALL__(.+?)__\n?/g;
+      let toolCallMatch;
+      while ((toolCallMatch = toolCallRegex.exec(buffer)) !== null) {
+        try {
+          const parsed = JSON.parse(toolCallMatch[1]);
+          const tc = { name: parsed.name, args: parsed.args };
+          setStreamingToolCalls(prev => [...prev, tc]);
+          collectedToolCalls.current.push(tc);
+        } catch { /* skip malformed tool call markers */ }
+      }
+      buffer = buffer.replace(/\n?__NOVA_TOOL_CALL__(.+?)__\n?/g, '');
 
       // Process characters one at a time
       while (buffer.length > 0) {

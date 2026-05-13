@@ -9,6 +9,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Model Context Protocol (MCP)**: Extensible tool system for enhanced AI capabilities
 - **Custom Function Tools**: Example time and random number generation functions
 - **Real-time Streaming**: Choose from chunk, word-by-word, or character-by-character streaming animations
+- **Tool Call Visibility**: Inline badges show tool name and arguments in real-time during streaming
 - **Markdown rendering**: Real-time markdown rendering during generation
 - **Copy Messages**: One-click copying of any message to clipboard
 - **Configurable Settings**: Easy model switching and tool configuration for each message
@@ -27,7 +28,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Runtime**: Node.js with Express
 - **LLM Provider**: Google GenAI SDK
 - **MCP Support**: Model Context Protocol client for extensible tools
-- **Streaming**: Server-sent events for real-time responses
+- **Streaming**: Chunked HTTP streaming for real-time responses with tool call markers
 
 ## Quick Start
 
@@ -204,4 +205,10 @@ Stream chat responses from Gemini models.
 }
 ```
 
-**Response:** Server-sent events with text chunks
+**Response:** Chunked HTTP stream with text chunks. When the model makes a function call, a marker line is injected into the stream:
+
+```
+__NOVA_TOOL_CALL__{"name":"get_time","args":{"location":"America/New_York"}}__
+```
+
+The client parses these markers in real-time, displays them as inline tool call badges, and strips them from the visible text.

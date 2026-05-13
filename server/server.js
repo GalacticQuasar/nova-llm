@@ -37,8 +37,12 @@ await client.connect(serverParams);
 console.log("CONNECTED TO MCP SERVER")
 
 const getTime = async (location) => {
-	const time = new Date().toLocaleTimeString("en-US", { timeZone: location, hour: "2-digit", minute: "2-digit" });
-	return time;
+	try {
+		const time = new Date().toLocaleTimeString("en-US", { timeZone: location, hour: "2-digit", minute: "2-digit" });
+		return time;
+	} catch (error) {
+		return `Error: Invalid timezone "${location}". Try an IANA timezone like "America/New_York".`;
+	}
 };
 
 const getRandomNumber = async (min, max) => {
@@ -196,6 +200,7 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 
 		let functionCalls;
 		do {
+			const TOOL_CALL_MARKER = (data) => `\n__NOVA_TOOL_CALL__${JSON.stringify(data)}__\n`;
 			console.log("Generating response...")
 			const response = await ai.models.generateContentStream({
 				model: config.model,
@@ -210,13 +215,17 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 			process.stdout.write("\nStreaming response: ");
 			for await (const chunk of response) {
 				if (chunk.functionCalls) {
+					for (const fc of chunk.functionCalls) {
+						res.write(TOOL_CALL_MARKER({ name: fc.name, args: fc.args }));
+					}
 					console.log("\n---\tFunction calls:", chunk.functionCalls);
 					if (!config.mcpEnabled) {  // Only handle it manually if MCP mode is off (custom tools)
 						if (functionCalls) {
 							// add to list
 							functionCalls.push(...chunk.functionCalls);
+						} else {
+							functionCalls = [...chunk.functionCalls];
 						}
-						functionCalls = chunk.functionCalls;
 					}
 					continue;
 				}
