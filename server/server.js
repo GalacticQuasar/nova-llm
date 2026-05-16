@@ -21,12 +21,12 @@ dotenv.config();
 const mcpServers = {
 	"sequential-thinking": {
 		command: "node",
-		args: ["./node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"],
+		args: [path.join(__dirname, "node_modules", "@modelcontextprotocol", "server-sequential-thinking", "dist", "index.js")],
 		client: new Client({ name: "sequential-thinking-client", version: "1.0.0" }),
 	},
 	"weather": {
 		command: "node",
-		args: ["./node_modules/@dangahagan/weather-mcp/dist/index.js"],
+		args: [path.join(__dirname, "node_modules", "@dangahagan", "weather-mcp", "dist", "index.js")],
 		client: new Client({ name: "weather-client", version: "1.0.0" }),
 	},
 };
