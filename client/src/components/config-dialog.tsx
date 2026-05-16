@@ -86,7 +86,7 @@ export function ConfigDialog() {
                             onCheckedChange={(checked) => updateMcpEnabled(checked)}
                         />
                         <Label htmlFor="mcpEnabled" className="text-right ml-auto flex items-center gap-2">
-                            Sequential Thinking
+                            Weather MCP
                             <span className={`text-xs px-2 py-1 rounded ${config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                 {config.mcpEnabled ? 'Enabled' : 'Disabled'}
                             </span>
