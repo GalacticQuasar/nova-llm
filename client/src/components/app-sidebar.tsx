@@ -8,47 +8,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-//  SidebarHeader,
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/sidebar"
 import { NavUser } from "./nav-user"
-import { CirclePlus } from "lucide-react"
-//import { Button } from "@/components/ui/button"
-
-// Menu items
-const items = [
-  {
-    title: "How to cut a watermelon?",
-    url: "",
-  },
-  {
-    title: "What color are bananas?",
-    url: "",
-  },
-  {
-    title: "Explain the theory of relativity.",
-    url: "",
-  },
-  {
-    title: "How to bake a cake?",
-    url: "",
-  },
-  {
-    title: "How to make a sandwich?",
-    url: "",
-  },
-]
+import { CirclePlus, Trash2 } from "lucide-react"
+import { useChat } from "@/contexts/chat-context"
 
 const user = {
   name: "User",
   email: "user@example.com",
-  avatar: "Galactic-Logo.png",  // Update this to be dynamically later
+  avatar: "Galactic-Logo.png",
 }
 
 export function AppSidebar() {
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
+  const { chats, currentChatId, loadChat, clearCurrentChat, deleteChat } = useChat()
+
+  const handleNewChat = () => {
+    clearCurrentChat()
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -66,11 +46,9 @@ export function AppSidebar() {
                 </div>
               </SidebarMenuItem>
               <SidebarMenuItem className="mt-2">
-                <SidebarMenuButton className="text-teal-300" asChild>
-                  <a href="/">
-                    <CirclePlus className="scale-140" />
-                    <span className="ml-2 font-mono">New Chat</span>
-                  </a>
+                <SidebarMenuButton className="text-teal-300" onClick={handleNewChat}>
+                  <CirclePlus className="scale-140" />
+                  <span className="ml-2 font-mono">New Chat</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -81,13 +59,26 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <div className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                {items.map((item) => (
-                  <SidebarMenuItem className="my-0.5" key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
+                {chats.map((chat) => (
+                  <SidebarMenuItem className="my-0.5 group/item" key={chat.id}>
+                    <div className="flex items-center gap-1 w-full">
+                      <SidebarMenuButton
+                        isActive={chat.id === currentChatId}
+                        onClick={() => loadChat(chat.id)}
+                        className="flex-1"
+                      >
+                        <span className="truncate">{chat.title}</span>
+                      </SidebarMenuButton>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteChat(chat.id)
+                        }}
+                        className="opacity-0 group-hover/item:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0 p-1"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </SidebarMenuItem>
                 ))}
               </div>

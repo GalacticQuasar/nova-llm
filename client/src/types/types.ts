@@ -9,6 +9,14 @@ export type Message = {
     toolCalls?: ToolCallInfo[]
 }
 
+export type Chat = {
+    id: string
+    title: string
+    messages: Message[]
+    createdAt: number
+    updatedAt: number
+}
+
 export interface ChatInputProps {
     prompt: string
     setPrompt: (prompt: string) => void

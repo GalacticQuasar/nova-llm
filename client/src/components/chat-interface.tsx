@@ -7,6 +7,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer"
 import { toast } from "sonner"
 import { Copy, Loader, Wrench } from 'lucide-react'
 import { useConfig } from '@/contexts/config-context'
+import { useChat } from '@/contexts/chat-context'
 
 function ToolCallBadge({ toolCall }: { toolCall: ToolCallInfo }) {
   const argsStr = Object.entries(toolCall.args)
@@ -140,18 +141,28 @@ const MessageList = memo(({ messages, isLoading, streamingResponse, streamingToo
 
 function ChatInterface() {
   const { config } = useConfig()
+  const { currentChat, currentChatId, createChat, saveCurrentChat } = useChat()
   const [startState, setStartState] = useState(true)
   const [faded, setFaded] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  //const [isError, setIsError] = useState(false)
   const [streamingResponse, setStreamingResponse] = useState("")
   const [streamingToolCalls, setStreamingToolCalls] = useState<ToolCallInfo[]>([])
   const collectedToolCalls = useRef<ToolCallInfo[]>([])
   const abortController = useRef<{ aborted: boolean }>({ aborted: false });
 
   const transitionDuration = 200
+
+  useEffect(() => {
+    if (currentChat && currentChat.messages.length > 0) {
+      setStartState(false)
+      setMessages(currentChat.messages)
+    } else if (!currentChatId) {
+      setStartState(true)
+      setMessages([])
+    }
+  }, [currentChatId, currentChat])
 
   // Memoize the message list to prevent unnecessary re-renders
   const messageList = useMemo(() => (
@@ -161,15 +172,18 @@ function ChatInterface() {
   const handleSend = async () => {
     if (!prompt.trim() || isLoading) return;
 
-    if (startState) {
-      setFaded(true)
-      setTimeout(() => setStartState(false), transitionDuration) // wait for fade duration
+    let chatId = currentChatId
+    if (!chatId) {
+      chatId = createChat()
     }
 
-    // Create updated messages array
+    if (startState) {
+      setFaded(true)
+      setTimeout(() => setStartState(false), transitionDuration)
+    }
+
     const updatedMessages: Message[] = [...messages, { role: 'user' as const, content: prompt }];
     
-    // Update state with new messages
     setMessages(updatedMessages);
     setPrompt('');
     abortController.current.aborted = false;
@@ -181,16 +195,18 @@ function ChatInterface() {
       const stream = await postStream(updatedMessages, config);
       if (!stream) throw new Error('No stream received');
 
-      // Choose stream animation type based on config in localstorage
       const streamType = config.streamType ? config.streamType : 'Chunk';
 
       const fullResponse = await streamFunctionSelector(streamType)(stream);
 
       const toolCalls = collectedToolCalls.current;
-      setMessages(prev => [...prev, { role: 'model' as const, content: fullResponse, toolCalls: toolCalls.length > 0 ? toolCalls : undefined }]);
+      const finalMessages: Message[] = [...updatedMessages, { role: 'model' as const, content: fullResponse, toolCalls: toolCalls.length > 0 ? toolCalls : undefined }];
+      setMessages(finalMessages);
       setStreamingResponse('');
+      if (chatId) {
+        saveCurrentChat(finalMessages, chatId)
+      }
     } catch (error) {
-      //setIsError(true)  //TODO: Add error message with toast, maybe option to try again since message is saved in messages array
       console.error('Streaming error:', error);
       if (error instanceof Error && error.message.includes('429')) {
         toast.error('Server is busy. Please try again later.');
