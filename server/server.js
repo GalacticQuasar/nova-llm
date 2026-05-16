@@ -17,24 +17,43 @@ dotenv.config();
 
 // Set up AI stuff
 
-// Create server parameters for stdio connection
-const serverParams = new StdioClientTransport({
-	command: "npx", // Executable
-	args: ["-y", "@dangahagan/weather-mcp@latest"]
-});
+// MCP server configurations
+const mcpServers = {
+	"sequential-thinking": {
+		transport: new StdioClientTransport({
+			command: "npx",
+			args: ["--cache", "/tmp/.npm", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+		}),
+		client: new Client({ name: "sequential-thinking-client", version: "1.0.0" }),
+	},
+	"weather": {
+		transport: new StdioClientTransport({
+			command: "npx",
+			args: ["-y", "@dangahagan/weather-mcp@latest"]
+		}),
+		client: new Client({ name: "weather-client", version: "1.0.0" }),
+	},
+};
 
-const client = new Client(
-	{
-		name: "example-client",
-		version: "1.0.0"
+// Track which MCP servers are connected
+const connectedServers = {};
+
+// Connect to an MCP server on demand (lazy connection)
+async function getMcpClient(serverName) {
+	if (connectedServers[serverName]) {
+		return mcpServers[serverName].client;
 	}
-);
+	const server = mcpServers[serverName];
+	if (!server) {
+		throw new Error(`Unknown MCP server: ${serverName}`);
+	}
+	await server.client.connect(server.transport);
+	connectedServers[serverName] = true;
+	console.log(`CONNECTED TO MCP SERVER: ${serverName}`);
+	return server.client;
+}
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// Initialize the connection between client and server
-await client.connect(serverParams);
-console.log("CONNECTED TO MCP SERVER")
 
 const getTime = async (location) => {
 	try {
@@ -163,9 +182,7 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 		}
 
 		// Use config from request or fallback to default
-		const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true }, mcpEnabled: false };
-		
-
+		const config = req.body.config || { model: geminiConfig.defaultModel, tools: { get_time: true, get_random_number: true }, mcpServer: "none" };
 
 		// Validate model and fallback to default if invalid
 		if (!config.model || !geminiConfig.validModels.includes(config.model)) {
@@ -175,9 +192,10 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 
 		// Check if MCP is enabled, otherwise use custom tools
 		let tools;
-		if (config.mcpEnabled === true) {
-			console.log("MCP ENABLED, not using custom tools.")
-			tools = [mcpToTool(client)]
+		if (config.mcpServer && config.mcpServer !== "none") {
+			console.log(`MCP ENABLED: ${config.mcpServer}, not using custom tools.`);
+			const mcpClient = await getMcpClient(config.mcpServer);
+			tools = [mcpToTool(mcpClient)]
 		} else {
 			// Filter function declarations based on enabled tools
 			let enabledFunctionDeclarations = geminiConfig.functionDeclarations.filter(func => {
@@ -219,7 +237,7 @@ app.post("/api/stream", streamRateLimit, async (req, res) => {
 						res.write(TOOL_CALL_MARKER({ name: fc.name, args: fc.args }));
 					}
 					console.log("\n---\tFunction calls:", chunk.functionCalls);
-					if (!config.mcpEnabled) {  // Only handle it manually if MCP mode is off (custom tools)
+					if (!config.mcpServer || config.mcpServer === "none") {  // Only handle it manually if MCP mode is off (custom tools)
 						if (functionCalls) {
 							// add to list
 							functionCalls.push(...chunk.functionCalls);

@@ -12,11 +12,22 @@ import { Switch } from "@/components/ui/switch"
 import { ModelSelect } from "@/components/model-select"
 import { StreamSelect } from "@/components/stream-select"
 import { Separator } from "@/components/ui/separator"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Settings } from "lucide-react"
 import { useConfig } from "@/contexts/config-context"
 
 export function ConfigDialog() {
-    const { config, updateTool, updateMcpEnabled } = useConfig()
+    const { config, updateTool, updateMcpServer } = useConfig()
+
+    const mcpEnabled = config.mcpServer !== "none"
 
     return (
         <Dialog>
@@ -44,20 +55,20 @@ export function ConfigDialog() {
                         <ModelSelect />
                     </div>
                     <Separator />
-                    <Label className={`text-right ${config.mcpEnabled ? 'text-red-400' : ''}`}>
-                        Tools {config.mcpEnabled ? '(Disabled due to MCP Mode)' : '(Custom Tools)'}
+                    <Label className={`text-right ${mcpEnabled ? 'text-red-400' : ''}`}>
+                        Tools {mcpEnabled ? '(Disabled due to MCP Mode)' : '(Custom Tools)'}
                     </Label>
                     <div className="grid grid-cols-2 items-center gap-4">
                         <Switch 
                             id="get_time" 
                             checked={config.tools.get_time}
-                            disabled={config.mcpEnabled}
+                            disabled={mcpEnabled}
                             onCheckedChange={(checked) => updateTool('get_time', checked)}
                         />
-                        <Label htmlFor="get_time" className={`text-right ml-auto flex items-center gap-2 ${config.mcpEnabled ? 'opacity-50' : ''}`}>
+                        <Label htmlFor="get_time" className={`text-right ml-auto flex items-center gap-2 ${mcpEnabled ? 'opacity-50' : ''}`}>
                             Get Time
-                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_time && !config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.mcpEnabled ? 'Disabled' : (config.tools.get_time ? 'Enabled' : 'Disabled')}
+                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_time && !mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {mcpEnabled ? 'Disabled' : (config.tools.get_time ? 'Enabled' : 'Disabled')}
                             </span>
                         </Label>
                     </div>
@@ -65,32 +76,37 @@ export function ConfigDialog() {
                         <Switch 
                             id="get_random_number" 
                             checked={config.tools.get_random_number}
-                            disabled={config.mcpEnabled}
+                            disabled={mcpEnabled}
                             onCheckedChange={(checked) => updateTool('get_random_number', checked)}
                         />
-                        <Label htmlFor="get_random_number" className={`text-right ml-auto flex items-center gap-2 ${config.mcpEnabled ? 'opacity-50' : ''}`}>
+                        <Label htmlFor="get_random_number" className={`text-right ml-auto flex items-center gap-2 ${mcpEnabled ? 'opacity-50' : ''}`}>
                             Get Random Number
-                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_random_number && !config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.mcpEnabled ? 'Disabled' : (config.tools.get_random_number ? 'Enabled' : 'Disabled')}
+                            <span className={`text-xs px-2 py-1 rounded ${config.tools.get_random_number && !mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {mcpEnabled ? 'Disabled' : (config.tools.get_random_number ? 'Enabled' : 'Disabled')}
                             </span>
                         </Label>
                     </div>
                     <Separator />
                     <Label className={`text-right`}>
-                        MCP (Model Context Protocol)
+                        MCP Server (Model Context Protocol)
                     </Label>
                     <div className="grid grid-cols-2 items-center gap-4">
-                        <Switch 
-                            id="mcpEnabled" 
-                            checked={config.mcpEnabled}
-                            onCheckedChange={(checked) => updateMcpEnabled(checked)}
-                        />
-                        <Label htmlFor="mcpEnabled" className="text-right ml-auto flex items-center gap-2">
-                            Weather MCP
-                            <span className={`text-xs px-2 py-1 rounded ${config.mcpEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {config.mcpEnabled ? 'Enabled' : 'Disabled'}
-                            </span>
+                        <Label htmlFor="mcpServer" className="text-right">
+                            Server
                         </Label>
+                        <Select value={config.mcpServer} onValueChange={updateMcpServer}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select MCP server" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>MCP Servers</SelectLabel>
+                                    <SelectItem value="none">None (Custom Tools)</SelectItem>
+                                    <SelectItem value="sequential-thinking">Sequential Thinking</SelectItem>
+                                    <SelectItem value="weather">Weather MCP</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <Separator />
                     <div className="grid grid-cols-2 items-center gap-4">

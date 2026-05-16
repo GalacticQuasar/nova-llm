@@ -7,7 +7,7 @@ export interface ConfigState {
     get_random_number: boolean
   }
   streamType: string
-  mcpEnabled: boolean
+  mcpServer: string
 }
 
 interface ConfigContextType {
@@ -15,7 +15,7 @@ interface ConfigContextType {
   updateModel: (model: string) => void
   updateTool: (toolName: keyof ConfigState['tools'], enabled: boolean) => void
   updateStreamType: (streamType: string) => void
-  updateMcpEnabled: (enabled: boolean) => void
+  updateMcpServer: (server: string) => void
   saveConfig: () => void
 }
 
@@ -26,7 +26,7 @@ const defaultConfig: ConfigState = {
     get_random_number: false
   },
   streamType: "Word",
-  mcpEnabled: false
+  mcpServer: "none"
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
@@ -35,7 +35,16 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<ConfigState>(() => {
     // Load from localStorage on initialization
     const saved = localStorage.getItem('nova-config')
-    return saved ? JSON.parse(saved) : defaultConfig
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // Migrate from old mcpEnabled boolean to mcpServer string
+      if (parsed.mcpEnabled !== undefined && parsed.mcpServer === undefined) {
+        parsed.mcpServer = parsed.mcpEnabled ? 'weather' : 'none'
+        delete parsed.mcpEnabled
+      }
+      return parsed
+    }
+    return defaultConfig
   })
 
   const updateModel = (model: string) => {
@@ -56,8 +65,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     setConfig(prev => ({ ...prev, streamType }))
   }
 
-  const updateMcpEnabled = (enabled: boolean) => {
-    setConfig(prev => ({ ...prev, mcpEnabled: enabled }))
+  const updateMcpServer = (server: string) => {
+    setConfig(prev => ({ ...prev, mcpServer: server }))
   }
 
   const saveConfig = () => {
@@ -74,7 +83,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     updateModel,
     updateTool,
     updateStreamType,
-    updateMcpEnabled,
+    updateMcpServer,
     saveConfig
   }
 
