@@ -12,6 +12,7 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Tool Call Visibility**: Inline badges show tool name and arguments in real-time during streaming
 - **Markdown rendering**: Real-time markdown rendering during generation
 - **Copy Messages**: One-click copying of any message to clipboard
+- **Chat Persistence**: Chats are saved to IndexedDB and persist across sessions with recent chats in the sidebar
 - **Configurable Settings**: Easy model switching and tool configuration for each message
 
 ## Architecture
@@ -21,7 +22,8 @@ A full-stack LLM agent workflow with custom tool calling capabilities and config
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS with custom design system
 - **UI Components**: Shadcn/ui components with custom styling
-- **State Management**: React Context for configuration
+- **State Management**: React Context for configuration and chat state
+- **Persistence**: IndexedDB for client-side chat storage
 - **Markdown Rendering**: Full markdown support with syntax highlighting
 
 ### Backend (Server)
@@ -107,9 +109,10 @@ nova-llm/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/     # UI components
-│   │   ├── contexts/       # React contexts
+│   │   ├── contexts/       # React contexts (config, chat)
 │   │   ├── hooks/          # Custom hooks
 │   │   ├── api/            # API client
+│   │   ├── lib/            # Utilities (IndexedDB wrapper)
 │   │   └── types/          # TypeScript types
 │   └── public/             # Static assets
 └── server/                 # Express backend
