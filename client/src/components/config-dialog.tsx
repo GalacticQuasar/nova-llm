@@ -22,6 +22,7 @@ export function ConfigDialog() {
         <Dialog>
             <DialogTrigger asChild>
                 <Button
+                    data-config-trigger
                     className={`cursor-pointer border-1 rounded-lg text-muted-foreground bg-input/20 hover:bg-input/20 hover:text-teal-300 transition-colors duration-300`}
                 >
                     <Settings className="scale-125" />
