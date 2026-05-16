@@ -20,17 +20,13 @@ dotenv.config();
 // MCP server configurations
 const mcpServers = {
 	"sequential-thinking": {
-		transport: new StdioClientTransport({
-			command: "npx",
-			args: ["--cache", "/tmp/.npm", "-y", "@modelcontextprotocol/server-sequential-thinking"]
-		}),
+		command: "node",
+		args: ["./node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"],
 		client: new Client({ name: "sequential-thinking-client", version: "1.0.0" }),
 	},
 	"weather": {
-		transport: new StdioClientTransport({
-			command: "npx",
-			args: ["-y", "@dangahagan/weather-mcp@latest"]
-		}),
+		command: "node",
+		args: ["./node_modules/@dangahagan/weather-mcp/dist/index.js"],
 		client: new Client({ name: "weather-client", version: "1.0.0" }),
 	},
 };
@@ -47,7 +43,11 @@ async function getMcpClient(serverName) {
 	if (!server) {
 		throw new Error(`Unknown MCP server: ${serverName}`);
 	}
-	await server.client.connect(server.transport);
+	const transport = new StdioClientTransport({
+		command: server.command,
+		args: server.args,
+	});
+	await server.client.connect(transport);
 	connectedServers[serverName] = true;
 	console.log(`CONNECTED TO MCP SERVER: ${serverName}`);
 	return server.client;

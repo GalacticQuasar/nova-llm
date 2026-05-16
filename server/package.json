@@ -12,8 +12,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@dangahagan/weather-mcp": "^1.6.1",
     "@google/genai": "^1.14.0",
     "@modelcontextprotocol/sdk": "^1.17.3",
+    "@modelcontextprotocol/server-sequential-thinking": "^2025.12.18",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
